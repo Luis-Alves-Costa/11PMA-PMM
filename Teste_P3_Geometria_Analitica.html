@@ -121,7 +121,8 @@ header.header-institucional .header-center h1{font-family:Arial,Helvetica,sans-s
 <script>
 "use strict";
 /* ================= Configuração ================= */
-const PROF_EMAIL="luis.costa@esmp.pt";      // destinatário do botão «Enviar ao professor»
+const PROF_EMAIL="luis.costa@esmp.pt";
+const ENVIO_URL="https://script.google.com/macros/s/AKfycbx4-oWW2HY9ZP4wJasg-gC8lhvajGhL3scXtr6VkN6wNbNT5sIyIIyQD4feGKHUzalnng/exec";                         // recetor (Apps Script): lança a nota no Classroom e atualiza a folha de controlo      // destinatário do botão «Enviar ao professor»
 const EXIGE_MAXIMO=false;                    // true = só pode passar de nível quem tiver 100 (ou 150) pontos
 const MAX_NOVAS=2;                           // novas perguntas sobre o mesmo tema depois de um erro
 const MAX_TROCAS=2;                          // perguntas que podem ser trocadas por um tema à escolha, em cada nível
@@ -1051,7 +1052,7 @@ function home(){
   app.innerHTML=`<div class="card"><h1>Teste – P3 Geometria Analítica</h1><p class="mu" style="margin-top:0">No plano e no espaço</p>
   <div class="lvl">${LV.map(v=>`<div>${v.nome}<b>${v.pts} pontos</b><span class="mu">por pergunta</span></div>`).join("")}</div>
   <p class="mu" style="font-size:.8rem;margin:10px 0 0;border-top:1px solid var(--bd);padding-top:8px">Nota: a correção completa do teste só pode ser consultada ${ESPERA_REVISAO_H} horas depois de o terminares.</p></div>
-  <div class="card"><label for="nm">Nome *</label><input id="nm" autocomplete="name">
+  <div class="card"><label for="nm">Nome completo (como aparece no Classroom) *</label><input id="nm" autocomplete="name">
   <label for="tm">Turma *</label><input id="tm" value="11.º PMA/PMM">
   <label for="al">Que nota esperas alcançar neste teste? <b id="alv">12</b> valores</label><input type="range" id="al" min="9.5" max="20" step="0.5" value="12" style="padding:0;border:0">
   <div class="ko" id="er"></div><button class="btn" style="width:100%" id="go">Começar o Nível 1</button></div>`;
@@ -1344,11 +1345,13 @@ function final(){
   <div class="card nop" id="ak">${S.ack?"":`<p style="font-weight:700;margin-top:0">Sabes que este instrumento de avaliação, uma vez entregue ao professor, e cruzado com outros elementos que ele já tem, vai ser importante para a tua aprovação no módulo?</p>
    <div class="col"><button class="btn" id="sim">Sim, sei. Quero entregar.</button>${podeVoltar()?`<button class="btn sec" id="vb">Antes de entregar, quero voltar atrás e concentrar-me de novo</button>`:""}</div>`}
   ${S.ack?`<div style="text-align:center;margin-bottom:14px"><p style="font-size:1.35rem;font-weight:800;color:var(--ok);margin:0">Bom trabalho!</p><p style="margin:4px 0 0">Obrigado pelo teu empenho neste teste.</p><p class="mu" style="font-size:.85rem;margin:6px 0 0">A correção completa do teste pode ser consultada a partir de ${quando(S.fim)} (${ESPERA_REVISAO_H} horas depois de o terminares).</p></div>`:""}
-  <div class="col" id="ent" style="${S.ack?"":"display:none"}"><p class="mu" style="margin:0">Entrega o resultado ao professor:</p><button class="btn" id="gc">Entregar no Google Classroom</button><button class="btn sec" id="em">Enviar ao professor (email)</button><button class="btn sec" id="cp">Copiar o resultado</button><button class="btn sec" id="pr">Imprimir / guardar PDF</button>
+  <div class="col" id="ent" style="${S.ack?"":"display:none"}">${ENVIO_URL?`<div class="fb ${S.envio==="ok"?"ok":""}" id="envst" style="margin:0;border-left-color:${S.envio==="ok"?"var(--ok)":"var(--ac)"}">${S.envio==="ok"?"✔ O teu resultado foi enviado ao professor. A nota vai aparecer no Classroom e no teu email.":S.envio==="erro"?"Não foi possível enviar automaticamente (sem rede?). <button class=\"btn sec\" id=\"reenv\" style=\"margin-top:6px;width:100%\">Tentar enviar outra vez</button>":"A enviar o resultado ao professor…"}</div>`:""}<p class="mu" style="margin:0">${ENVIO_URL?"Também podes entregar por aqui:":"Entrega o resultado ao professor:"}</p><button class="btn" id="gc">Entregar no Google Classroom</button><button class="btn sec" id="em">Enviar ao professor (email)</button><button class="btn sec" id="cp">Copiar o resultado</button><button class="btn sec" id="pr">Imprimir / guardar PDF</button>
   <button class="btn sec" id="rv" ${revisaoAberta(S.fim)?"":"disabled"}>${revisaoAberta(S.fim)?"Rever o teste completo":"Revisão completa disponível a partir de "+quando(S.fim)}</button><div class="mu" id="st"></div></div></div>`;
+  if(S.ack)enviarAuto();
   if(window.sim)sim.onclick=()=>{S.ack=true;regista("entrega",`Confirmou que quer entregar, com ${fm(total()/10)} valores`);save();final()};
   if(window.vb)vb.onclick=()=>{regista("voltar",`No ecrã final (${fm(total()/10)} valores), escolheu voltar atrás antes de entregar`);voltar()};
   if(window.emg)emg.onclick=()=>{regista("emerg",`Ecrã final: aceitou o plano de emergência (nota ${fm(total()/10)}, meta ${fm(S.alvo)})`);S.ajuda=true;S.rota={emerg:1,passos:sugerir(S.lv,true)};S.escolhas=(S.escolhas||[]).concat("Fim: plano de emergência");save();final()};
+  if(window.reenv)reenv.onclick=()=>{S.envio=null;save();final()};
   gc.onclick=classroom;
   em.onclick=()=>{const su=encodeURIComponent("Teste P3 Geometria Analítica – "+S.nome+" – "+S.turma);
     let corpo=texto(2);let url=`mailto:${PROF_EMAIL}?subject=${su}&body=${encodeURIComponent(corpo)}`;
@@ -1533,6 +1536,19 @@ function comp(){
   const d={n:S.nome,t:S.turma,i:S.id,f:S.fim,q:compacto(S.it),x:compacto(S.xt),g:S.gl||[0,0,0],p:total()};
   d.h=hsh(SAL+JSON.stringify(d));
   return location.href.split("#")[0]+"#r="+b64e(d);
+}
+// envio automático do resultado para o recetor (Apps Script): uma vez por teste, depois de confirmada a entrega
+async function enviarAuto(){
+  if(!ENVIO_URL||S.envio==="ok"||(S.envio==="a enviar"&&Date.now()-(S.envioT||0)<20000))return;
+  const r=resumo(),R=radiografia(),P=perfil(),em=(S.log||[]).filter(e=>e[1]==="emerg").map(e=>e[2]).join("; ");
+  const d={nome:S.nome,turma:S.turma,codigo:S.id,valores:Math.round(total())/10,pontos:Math.round(total()*10)/10,
+    n1:Math.round(ptsLv(0)*10)/10,n2:Math.round(ptsLv(1)*10)/10,n3:Math.round(ptsLv(2)*10)/10,
+    metaInicial:(S.alvos&&S.alvos[0])?S.alvos[0].v:"",metaFinal:S.alvo??"",autoavaliacao:S.est??"",emergencia:em||"não",
+    radiografia:R.curto,perfil:P.curto,inicio:S.ini,fim:S.fim,link:comp(),relatorio:texto(2)};
+  S.envio="a enviar";S.envioT=Date.now();save();
+  try{await fetch(ENVIO_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(d)});S.envio="ok"}
+  catch(e){S.envio="erro"}
+  save();const b=document.getElementById("envst");if(b)final();
 }
 async function classroom(){
   const u=comp();
