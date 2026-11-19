@@ -108,6 +108,23 @@ button{font:inherit;cursor:pointer}
 #vMic.ativo{animation:puls 1.2s infinite}
 @keyframes puls{0%{box-shadow:0 0 0 0 rgba(232,131,90,.5)}100%{box-shadow:0 0 0 14px rgba(232,131,90,0)}}
 [hidden]{display:none!important}
+#relatorio{max-width:1000px;margin:16px auto;padding:0 16px 40px;font:400 16px/1.5 Arial,Helvetica,sans-serif;color:#1f2a37;background:#fff}
+#relatorio h2{font-size:1.5rem;margin:8px 0}
+#relatorio h3{margin:22px 0 8px;color:#2f5f8f}
+#relatorio .valido{color:#2f8a63;font-weight:600} #relatorio .invalido{color:#b0413e;font-weight:600}
+#relatorio .cartoes{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:12px 0}
+#relatorio .cartoes div{border:1px solid #d9e2ef;border-radius:10px;padding:10px 12px;background:#f7f9fc}
+#relatorio .cartoes b{display:block;font-size:1.5rem;color:#003b66} #relatorio .cartoes span{font-size:.85rem;color:#555}
+#relatorio table{width:100%;border-collapse:collapse;font-size:.92rem}
+#relatorio th,#relatorio td{border:1px solid #d9e2ef;padding:6px 8px;text-align:left;vertical-align:top}
+#relatorio th{background:#dfeffc}
+#relatorio tr.ok td:nth-child(5){color:#2f8a63} #relatorio tr.nao td:nth-child(5){color:#9a4a63}
+#relatorio .nota{font-size:.88rem;color:#555}
+@media print{#relatorio .acoesR{display:none}}
+.linhaL{display:flex;flex-wrap:wrap;gap:6px}
+.linhaL button{font:inherit;font-size:.95rem;padding:6px 10px;border-radius:12px;border:1px solid var(--ln);background:var(--bg);color:var(--fg);cursor:pointer}
+.linhaL button b{font-size:.72rem;font-weight:600;padding:1px 5px;border-radius:6px;background:#dde8f5;color:#1f2a37;margin-right:4px}
+.linhaL button.on{border-color:#4a78d6;background:color-mix(in srgb,#7fa6f0 20%,var(--card))}
 .opcoes{display:flex;flex-direction:column;gap:10px;margin-top:6px}
 .opcoes button{display:flex;gap:12px;align-items:flex-start;text-align:left;font:inherit;font-size:1.06rem;line-height:1.4;padding:12px 14px;border-radius:14px;border:1.5px solid var(--ln);background:var(--bg);color:var(--fg);cursor:pointer;transition:background .25s,border-color .25s}
 .opcoes button b{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#dde8f5;color:#1f2a37;font-weight:600;font-size:.9rem}
@@ -247,13 +264,10 @@ header.header-institucional{position:relative;z-index:1}
   <p class="notaL">As palavras dos círculos ficam sempre em português · The words in the circles are always in Portuguese · Las palabras de los círculos están siempre en portugués · वृत्तों के शब्द सदा पुर्तगाली में रहते हैं</p>
 </section>
 <section class="folha" id="inicio" aria-live="polite">
-  <h2 style="margin:4px 0 8px;font-weight:300;font-size:1.5rem">Prova · Generalidades sobre Funções</h2>
-  <ul>
-    <li>Com o léxico fechado, escolhe em cada palavra a <b>definição correta</b>, entre três muito parecidas: a diferença está nos pormenores.</li>
-    <li>Navegas pelos temas e pelos círculos como no léxico. Cada palavra respondida sai do círculo.</li>
-    <li>O cronómetro começa quando tocares em «Começar». No fim, envias o resultado ao professor.</li>
-  </ul>
-  <label for="nomeAluno">O teu nome</label>
+  <div class="linhaL" id="iniLinguas"><button data-lg="pt"><b>PT</b> Português</button><button data-lg="en"><b>EN</b> English</button><button data-lg="es"><b>ES</b> Español</button><button data-lg="hi" lang="hi"><b>HI</b> हिन्दी</button></div>
+  <h2 id="iniTit" style="margin:10px 0 8px;font-weight:300;font-size:1.5rem">Prova · Generalidades sobre Funções</h2>
+  <ul id="iniLista"></ul>
+  <label for="nomeAluno" id="iniNome">O teu nome</label>
   <input id="nomeAluno" autocomplete="name" placeholder="Nome e apelido">
   <div class="acoes"><button class="btn" id="comecar">Começar ▸</button></div>
 </section>
@@ -261,7 +275,7 @@ header.header-institucional{position:relative;z-index:1}
   <h2>Léxico concluído ✓</h2>
   <p id="fimTexto"></p>
   <ol id="fimLista"></ol>
-  <div class="acoes" id="fimEnvio" hidden><button class="btn" id="fimMail">✉ Enviar ao professor</button><button class="sec" id="fimCopiar">📋 Entregar no Classroom</button></div>
+  <div class="acoes" id="fimEnvio" hidden><button class="btn" id="fimCopiar">📋 Entregar no Classroom</button></div>
   <div class="acoes"><button class="sec" id="fimRecomecar">↺ Recomeçar</button><button class="btn" id="fimFechar">Fechar</button></div>
 </section>
 <section class="folha" id="verbal" aria-live="polite">
@@ -391,7 +405,345 @@ const CFG = {
   dicaU1: 'Escolhe um tema. Desliza o dedo pelos círculos e larga-o no que queres abrir.',
   progresso: true,
   prova: true,
-  envio: 'https://script.google.com/macros/s/AKfycbx4-oWW2HY9ZP4wJasg-gC8lhvajGhL3scXtr6VkN6wNbNT5sIyIIyQD4feGKHUzalnng/exec'
+  inicio: '2026-11-19T15:10:00'
+};
+
+/* Interface nas outras línguas (as palavras dos círculos ficam sempre em português) */
+const UI_TXT = {
+en: {
+  placeholder:'Type a word…', explicar:'Explain',
+  dicaU1:'Choose a topic. Slide your finger over the circles and release it on the one you want to open.',
+  dicaLex: u => 'In the centre, the most frequent terms; at the edge, the less frequent ones. Release your finger on a word to open it; tap the centre to go back to the topics.',
+  ouvir:'🔊 Listen', voltar:'↩ Back to the circles', exemplo:'Example: ', mesmoTema:'In the same topic', tambem:'Also appears in', repetir:'↻ Watch again',
+  prob:['very high','high','medium','low','rare'], probTit:'Probability of occurrence', temasTit:'Topics of the chapter',
+  circulo:(a,n) => `circle ${a} of ${n}`, chipCirc:(k,p) => `circle ${k} · probability ${p}`, nivel:['core','frequent','common','specialised'],
+  buscaLonga:'Your search is taking a while. Tell me the word you are looking for and I will find it.', diz:'Tell me the word you are looking for.',
+  semSR:'This browser does not recognise speech: type the word.', aOuvir:'🎤 listening…', semMic:'No microphone: type the word.', naoOuvi:'I did not hear you. Tap «Say it again», or type the word.',
+  fora: q => `The word «${q}» is not in the lexicon. Talk to your teacher about it.`, naoPercebi: q => `I did not quite understand «${q}». Say the word again, or type it.`, escreve:'Please type the word.',
+  vPlace:'Type the word…', procurar:'Search', dizerOutra:'🎤 Say it again', continuar:'↩ Keep looking',
+  encontrei: n => `Found: ${n}.`,
+  consultados:(n,N,f) => `Looked up <b>${n}</b> of ${N} · <b>${f}</b> to go`,
+  temaFeito: n => `Topic «${n}» completed ✓. Choose the next topic.`, jaFeito: n => `You have already looked up every term in «${n}». Choose another topic.`,
+  fimTit:'Lexicon completed ✓', fimTexto:(N,t) => `You looked up all ${N} terms of the lexicon in ${t}. Well done!`, recomecar:'↺ Start again', fechar:'Close', parabens: N => `Well done! You looked up all ${N} terms.`,
+  min:['minute','minutes'], seg:['second','seconds'], e:'and', lerEm:'Read in', pt:'Portuguese word', escolhaTit:'Choose the language of the explanations', voltarTemas:'Back to the topics.'
+},
+es: {
+  placeholder:'Escribe una palabra…', explicar:'Explicar',
+  dicaU1:'Elige un tema. Desliza el dedo por los círculos y suéltalo en el que quieras abrir.',
+  dicaLex: u => 'En el centro, los términos más frecuentes; en el borde, los menos frecuentes. Suelta el dedo en una palabra para abrirla; toca el centro para volver a los temas.',
+  ouvir:'🔊 Escuchar', voltar:'↩ Volver a los círculos', exemplo:'Ejemplo: ', mesmoTema:'En el mismo tema', tambem:'También aparece en', repetir:'↻ Ver otra vez',
+  prob:['muy alta','alta','media','baja','rara'], probTit:'Probabilidad de aparición', temasTit:'Temas del capítulo',
+  circulo:(a,n) => `círculo ${a} de ${n}`, chipCirc:(k,p) => `círculo ${k} · probabilidad ${p}`, nivel:['núcleo','frecuente','común','especializado'],
+  buscaLonga:'La búsqueda está tardando. Dime la palabra que buscas y la encuentro.', diz:'Dime la palabra que buscas.',
+  semSR:'Este navegador no reconoce la voz: escribe la palabra.', aOuvir:'🎤 escuchando…', semMic:'Sin micrófono: escribe la palabra.', naoOuvi:'No te he oído. Toca «Decirlo otra vez» o escribe la palabra.',
+  fora: q => `La palabra «${q}» no está en el léxico. Habla con tu profesor sobre ella.`, naoPercebi: q => `No he entendido bien «${q}». Repite la palabra o escríbela.`, escreve:'Escribe la palabra, por favor.',
+  vPlace:'Escribe la palabra…', procurar:'Buscar', dizerOutra:'🎤 Decirlo otra vez', continuar:'↩ Seguir buscando',
+  encontrei: n => `Encontrado: ${n}.`,
+  consultados:(n,N,f) => `Consultados <b>${n}</b> de ${N} · faltan <b>${f}</b>`,
+  temaFeito: n => `Tema «${n}» terminado ✓. Elige el tema siguiente.`, jaFeito: n => `Ya has consultado todos los términos de «${n}». Elige otro tema.`,
+  fimTit:'Léxico terminado ✓', fimTexto:(N,t) => `Has consultado los ${N} términos del léxico en ${t}. ¡Muy bien!`, recomecar:'↺ Empezar de nuevo', fechar:'Cerrar', parabens: N => `¡Enhorabuena! Has consultado los ${N} términos.`,
+  min:['minuto','minutos'], seg:['segundo','segundos'], e:'y', lerEm:'Leer en', pt:'palabra en portugués', escolhaTit:'Elige el idioma de las explicaciones', voltarTemas:'Volver a los temas.'
+},
+hi: {
+  placeholder:'कोई शब्द लिखें…', explicar:'समझाएँ',
+  dicaU1:'कोई विषय चुनें। उँगली को वृत्तों पर सरकाएँ और जिसे खोलना है उस पर छोड़ दें।',
+  dicaLex: u => 'केंद्र में सबसे अधिक आने वाले शब्द हैं; किनारे पर कम आने वाले। किसी शब्द पर उँगली छोड़कर उसे खोलें; विषयों पर लौटने के लिए केंद्र को छुएँ।',
+  ouvir:'🔊 सुनें', voltar:'↩ वृत्तों पर लौटें', exemplo:'उदाहरण: ', mesmoTema:'इसी विषय में', tambem:'यहाँ भी आता है', repetir:'↻ फिर से देखें',
+  prob:['बहुत अधिक','अधिक','मध्यम','कम','दुर्लभ'], probTit:'आने की प्रायिकता', temasTit:'अध्याय के विषय',
+  circulo:(a,n) => `वृत्त ${a} / ${n}`, chipCirc:(k,p) => `वृत्त ${k} · प्रायिकता ${p}`, nivel:['मूल','बार-बार','सामान्य','विशिष्ट'],
+  buscaLonga:'खोज लंबी हो रही है। मुझे वह शब्द बताएँ जिसे आप ढूँढ रहे हैं, मैं उसे ढूँढ दूँगा।', diz:'मुझे वह शब्द बताएँ जिसे आप ढूँढ रहे हैं।',
+  semSR:'यह ब्राउज़र आवाज़ नहीं पहचानता: शब्द लिखें।', aOuvir:'🎤 सुन रहा है…', semMic:'माइक्रोफ़ोन नहीं है: शब्द लिखें।', naoOuvi:'मैंने आपको नहीं सुना। «फिर से बोलें» दबाएँ, या शब्द लिखें।',
+  fora: q => `शब्द «${q}» इस शब्दकोश में नहीं है। इसके बारे में अपने शिक्षक से बात करें।`, naoPercebi: q => `मैं «${q}» ठीक से नहीं समझा। शब्द फिर से बोलें, या उसे लिखें।`, escreve:'कृपया शब्द लिखें।',
+  vPlace:'शब्द लिखें…', procurar:'खोजें', dizerOutra:'🎤 फिर से बोलें', continuar:'↩ खोज जारी रखें',
+  encontrei: n => `मिल गया: ${n}।`,
+  consultados:(n,N,f) => `देखे गए <b>${n}</b> / ${N} · बाकी <b>${f}</b>`,
+  temaFeito: n => `विषय «${n}» पूरा हुआ ✓। अगला विषय चुनें।`, jaFeito: n => `आप «${n}» के सभी शब्द देख चुके हैं। कोई दूसरा विषय चुनें।`,
+  fimTit:'शब्दकोश पूरा हुआ ✓', fimTexto:(N,t) => `आपने शब्दकोश के सभी ${N} शब्द ${t} में देखे। बहुत बढ़िया!`, recomecar:'↺ फिर से शुरू करें', fechar:'बंद करें', parabens: N => `बधाई हो! आपने सभी ${N} शब्द देख लिए।`,
+  min:['मिनट','मिनट'], seg:['सेकंड','सेकंड'], e:'और', lerEm:'इसमें पढ़ें', pt:'पुर्तगाली शब्द', escolhaTit:'व्याख्याओं की भाषा चुनें', voltarTemas:'विषयों पर लौटें।'
+}};
+const TEMAS_TR = {
+  en:['Concept of function','Representations of a function','Injectivity and surjectivity','Zeros and sign','Monotonicity and extrema','Parity and symmetry','Operations and transformations'],
+  es:['Concepto de función','Representaciones de una función','Inyectividad y sobreyectividad','Ceros y signo','Monotonía y extremos','Paridad y simetría','Operaciones y transformaciones'],
+  hi:['फलन की अवधारणा','फलन के निरूपण','एकैकी और आच्छादक फलन','शून्यक और चिह्न','एकदिष्टता और चरम मान','सम-विषमता और सममिति','संक्रियाएँ और रूपांतरण']
+};
+const TRAD = {};
+
+TRAD.en = {
+'função':['function','A correspondence that assigns to each element of a set A (the starting set) one and only one element of a set B (the target set).','f: {1, 2, 3} → {a, b, c, d}, with f(1) = a, f(2) = b and f(3) = b.'],
+'objeto':['object (input)','Each element of the domain of a function, that is, each value of x the function is applied to.','In f(3) = 7, the object is 3.'],
+'imagem':['image (output)','The element of the target set that the function assigns to an object; it is written f(x).','If f(x) = 2x + 1, the image of 3 is f(3) = 7.'],
+'domínio':['domain','The set of all the objects of a function; written D or D_f.','For f(x) = √x, the domain is [0, +∞[.'],
+'contradomínio':['range','The set of all the images of a function; it is contained in the target set. Written D′ or D′_f.','For f(x) = x², with x ∈ ℝ, the range is [0, +∞[.'],
+'correspondência':['correspondence','Any rule that associates elements of one set with elements of another; it is only a function if each object has one and only one image.','Assigning to each student their favourite subjects is not a function (there may be several).'],
+'variável independente':['independent variable','The variable whose values are chosen freely within the domain; usually x.','In the cost of a taxi as a function of kilometres, the kilometres are the independent variable.'],
+'variável dependente':['dependent variable','The variable whose value depends on the independent one; usually y = f(x).','The price to pay depends on the kilometres travelled.'],
+'conjunto de partida':['starting set','The set where the objects are; for a function, it is the domain.','In f: A → B, the starting set is A.'],
+'conjunto de chegada':['target set (codomain)','The set where the images are looked for; it contains the range but may be larger.','In f: ℝ → ℝ, f(x) = x², the target set is ℝ and the range is [0, +∞[.'],
+'expressão analítica':['analytic expression (formula)','A formula that lets you calculate the image of each object.','f(x) = 3x − 5 is the analytic expression of f.'],
+'função real de variável real':['real function of a real variable','A function whose domain and target set are subsets of ℝ.','g(x) = x² − 1, with x ∈ ℝ.'],
+'f(x)':['f(x)','Notation for the image of the object x under the function f; read «f of x».','f(2) = 5 means that the image of 2 is 5.'],
+'igualdade de funções':['equality of functions','Two functions are equal when they have the same domain, the same target set and the same image for each object.','f(x) = x²/x and g(x) = x are not equal: 0 is not in the domain of f.'],
+'restrição de uma função':['restriction of a function','The function obtained by keeping only part of the domain, with the same formula.','The restriction of x² to [0, +∞[ is injective.'],
+'domínio de existência':['natural domain','The largest subset of ℝ where the analytic expression makes sense.','For f(x) = 1/x, the domain is ℝ \\ {0}.'],
+'gráfico de uma função':['graph of a function','The set of points (x, f(x)) of the plane, with x in the domain.','The graph of f(x) = x² is a parabola.'],
+'referencial cartesiano':['Cartesian coordinate system','Two perpendicular number axes, Ox (x-axis) and Oy (y-axis), that cross at the origin.','The point (2, 3) is 2 units to the right and 3 up.'],
+'abcissa':['x-coordinate (abscissa)','The first coordinate of a point: read on the horizontal axis Ox.','The x-coordinate of (4, −1) is 4.'],
+'ordenada':['y-coordinate (ordinate)','The second coordinate of a point: read on the vertical axis Oy.','The y-coordinate of (4, −1) is −1.'],
+'par ordenado':['ordered pair','A pair (x, y) in which order matters; each point of the graph is the pair (object, image).','(2, 5) and (5, 2) are different pairs.'],
+'tabela de valores':['table of values','A representation of a function by a table with objects and their images.','x: −2, −1, 0, 1, 2; f(x): 4, 1, 0, 1, 4.'],
+'diagrama sagital':['arrow diagram','A representation with two sets and arrows from each object to its image.','Useful for functions with a finite domain.'],
+'representação algébrica':['algebraic representation','Representing a function by its analytic expression.','f(x) = 2x + 1.'],
+'representação verbal':['verbal representation','Describing the function in words.','«To each number it assigns its double plus one.»'],
+'teste da reta vertical':['vertical line test','A curve is the graph of a function if no vertical line cuts it at more than one point.','A circle is not the graph of a function.'],
+'ordenada na origem':['y-intercept','The y-coordinate of the point where the graph meets the Oy axis; it is f(0).','For f(x) = 2x + 1, the y-intercept is 1.'],
+'pontos de interseção com os eixos':['points of intersection with the axes','With Ox: points (x, 0) where x is a zero of the function; with Oy: the point (0, f(0)).','f(x) = x² − 4 meets Ox at (−2, 0) and (2, 0), and Oy at (0, −4).'],
+'escala':['scale','The correspondence between the units on the axes and the length on paper or screen; the axes may have different scales.','1 square = 10 euros on the Oy axis.'],
+'leitura gráfica':['reading a graph','Getting information (images, objects, zeros, extrema) by looking at the graph.','From the graph, f(1) ≈ 3.'],
+'função injetiva':['injective function (one-to-one)','A function in which different objects always have different images: if x₁ ≠ x₂, then f(x₁) ≠ f(x₂).','f(x) = 2x + 1 is injective; f(x) = x² is not.'],
+'função sobrejetiva':['surjective function (onto)','A function in which every element of the target set is the image of some object: range = target set.','f: ℝ → ℝ, f(x) = x³ is surjective.'],
+'função bijetiva':['bijective function','A function that is injective and surjective: each element of the target set corresponds to exactly one object.','f: ℝ → ℝ, f(x) = 2x + 1.'],
+'função não injetiva':['non-injective function','A function in which at least two different objects have the same image.','f(x) = x²: f(−2) = f(2) = 4.'],
+'teste da reta horizontal':['horizontal line test','A function is injective if no horizontal line cuts its graph at more than one point.','The line y = 1 cuts x²/2 − 1 at two points: it is not injective.'],
+'função inversa':['inverse function','The function f⁻¹ that undoes what f does: if f(a) = b, then f⁻¹(b) = a. It only exists if f is bijective.','f(x) = 2x + 1 has inverse f⁻¹(x) = (x − 1)/2.'],
+'correspondência um a um':['one-to-one correspondence','Another name for a bijection: each object has one image and each image comes from a single object.','Numbered seats in a room and seated students, with no empty seats.'],
+'imagem de um conjunto':['image of a set','The set of the images of the elements of a subset of the domain: f(C) = {f(x): x ∈ C}.','For f(x) = x², f([−1, 2]) = [0, 4].'],
+'simetria em relação a y = x':['symmetry about y = x','The graphs of f and f⁻¹ are symmetric about the line y = x.','The point (1, 3) of f corresponds to (3, 1) of f⁻¹.'],
+'inversa de uma composição':['inverse of a composition','To undo f after g: (f ∘ g)⁻¹ = g⁻¹ ∘ f⁻¹.','Socks and then shoes; to undo it, you take the shoes off first.'],
+'zero de uma função':['zero of a function','An object whose image is 0: x such that f(x) = 0. On the graph, the x-coordinate of a point where the graph meets Ox.','f(x) = x² − 4 has zeros −2 and 2.'],
+'sinal de uma função':['sign of a function','Studying the intervals where f(x) is positive, negative or zero.','f(x) = x² + x − 2 is positive in ]−∞, −2[ ∪ ]1, +∞[.'],
+'função positiva':['positive function','f is positive on an interval if f(x) > 0 for every x in it: the graph is above Ox.','f(x) = x² + 1 is positive on ℝ.'],
+'função negativa':['negative function','f is negative on an interval if f(x) < 0 for every x in it: the graph is below Ox.','f(x) = −x² − 1 is negative on ℝ.'],
+'quadro de sinal':['sign chart','A table that summarises, by intervals, the sign of f(x) and its zeros.','+  0  −  0  + for x² + x − 2.'],
+'raiz':['root','A solution of an equation; the zeros of f are the roots of the equation f(x) = 0.','x = 3 is a root of 2x − 6 = 0.'],
+'equação f(x) = 0':['equation f(x) = 0','The equation whose solutions are the zeros of f.','x² − 4 = 0 ⇔ x = −2 ∨ x = 2.'],
+'inequação f(x) > 0':['inequality f(x) > 0','The inequality whose solutions are the values where f is positive; solved with the sign chart or the graph.','x² − 4 > 0 ⇔ x < −2 ∨ x > 2.'],
+'função sem zeros':['function with no zeros','A function whose graph does not touch the Ox axis.','f(x) = x² + 1 has no real zeros.'],
+'zero duplo':['double zero','A zero where the graph touches the Ox axis without crossing it; the function does not change sign.','f(x) = (x − 1)² has a double zero at 1.'],
+'mudança de sinal':['change of sign','At a simple zero, the function goes from positive to negative or vice versa.','At x = 1, 2x − 2 goes from negative to positive.'],
+'monotonia':['monotonicity','Studying the intervals where the function is increasing, decreasing or constant.','x³ − 3x increases on ]−∞, −1], decreases on [−1, 1] and increases on [1, +∞[.'],
+'função crescente':['increasing function','On an interval, if x₁ < x₂ then f(x₁) < f(x₂): the graph «goes up» from left to right.','f(x) = 2x + 1 is increasing on ℝ.'],
+'função decrescente':['decreasing function','On an interval, if x₁ < x₂ then f(x₁) > f(x₂): the graph «goes down» from left to right.','f(x) = −x + 3 is decreasing on ℝ.'],
+'função constante':['constant function','A function in which all objects have the same image; its graph is a horizontal line.','f(x) = 3.'],
+'crescente em sentido lato':['non-decreasing (increasing in the broad sense)','If x₁ < x₂ then f(x₁) ≤ f(x₂): it may have constant stretches.','A price that rises in steps.'],
+'função monótona':['monotonic function','A function that, on an interval, is always increasing or always decreasing.','f(x) = x³ is monotonic on ℝ.'],
+'intervalo de monotonia':['interval of monotonicity','A largest interval where the function keeps the same direction of change.','[−1, 1] is an interval of monotonicity of x³ − 3x.'],
+'quadro de variação':['variation chart','A table that summarises the intervals of monotonicity (↗, ↘) and the extrema.','↗ 2 ↘ −2 ↗ for x³ − 3x.'],
+'extremo':['extremum','A maximum or minimum value reached by the function, absolute (on the whole domain) or relative (near a point).','The vertex of a parabola is an extremum.'],
+'máximo absoluto':['absolute maximum','The largest image of the function on its whole domain.','f(x) = −x² + 4 has absolute maximum 4, at x = 0.'],
+'mínimo absoluto':['absolute minimum','The smallest image of the function on its whole domain.','f(x) = x² + 1 has absolute minimum 1.'],
+'máximo relativo':['relative (local) maximum','An image that is the largest near that point, although there may be larger images elsewhere.','x³ − 3x has a relative maximum 2, at x = −1.'],
+'mínimo relativo':['relative (local) minimum','An image that is the smallest near that point.','x³ − 3x has a relative minimum −2, at x = 1.'],
+'maximizante':['maximiser (point of maximum)','The object where the function reaches a maximum.','For −x² + 4, the maximiser is 0.'],
+'minimizante':['minimiser (point of minimum)','The object where the function reaches a minimum.','For x² + 1, the minimiser is 0.'],
+'extremos num intervalo fechado':['extrema on a closed interval','On an interval [a, b], the absolute extrema may be inside or at the endpoints.','On [−1, 3], −(x − 1)² + 3 has maximum 3 and minimum −1.'],
+'vértice da parábola':['vertex of the parabola','The point where a quadratic function reaches its extremum; its monotonicity changes there.','x² − 2x − 3 has vertex (1, −4).'],
+'função par':['even function','A function with a symmetric domain such that f(−x) = f(x) for every x; its graph is symmetric about the Oy axis.','f(x) = x²: f(−2) = f(2) = 4.'],
+'função ímpar':['odd function','A function with a symmetric domain such that f(−x) = −f(x) for every x; its graph is symmetric about the origin.','f(x) = x³: f(−1) = −1 = −f(1).'],
+'nem par nem ímpar':['neither even nor odd','A function that satisfies neither of the two conditions.','f(x) = x² + x: f(−1) = 0, f(1) = 2.'],
+'domínio simétrico':['symmetric domain','A domain such that, if x belongs to it, −x also belongs; a necessary condition for parity.','[−3, 3] is symmetric; [−1, 4] is not.'],
+'simetria em relação ao eixo Oy':['symmetry about the Oy axis','Each point (x, y) of the graph has its partner (−x, y): the graph is the same on both sides of the axis.','The graph of |x|.'],
+'simetria em relação à origem':['symmetry about the origin','Each point (x, y) of the graph has its partner (−x, −y): a half turn leaves the graph unchanged.','The graph of 1/x.'],
+'paridade':['parity','The property of a function being even, odd or neither.','To study parity: work out f(−x) and compare it with f(x) and −f(x).'],
+'composição de funções':['composition of functions','Applying one function to the result of another: (f ∘ g)(x) = f(g(x)).','g(x) = x + 1, f(x) = x²: (f ∘ g)(2) = f(3) = 9.'],
+'soma de funções':['sum of functions','(f + g)(x) = f(x) + g(x), on the common domain.','f(x) = x, g(x) = 1: (f + g)(x) = x + 1.'],
+'produto de funções':['product of functions','(f × g)(x) = f(x) × g(x), on the common domain.','x × (x − 1) = x² − x.'],
+'quociente de funções':['quotient of functions','(f/g)(x) = f(x)/g(x), on the common domain, excluding the zeros of g.','f(x) = 1, g(x) = x: (f/g)(x) = 1/x, with x ≠ 0.'],
+'translação vertical':['vertical translation','The graph of f(x) + k is the graph of f moved k units up (k > 0) or down (k < 0).','x² + 2 is x² moved up 2 units.'],
+'translação horizontal':['horizontal translation','The graph of f(x − h) is the graph of f moved h units to the right (h > 0) or to the left (h < 0).','(x − 2)² is x² moved 2 units to the right.'],
+'reflexão no eixo Ox':['reflection in the Ox axis','The graph of −f(x) is the mirror image of the graph of f in the Ox axis.','−x² is x² «turned upside down».'],
+'reflexão no eixo Oy':['reflection in the Oy axis','The graph of f(−x) is the mirror image of the graph of f in the Oy axis.','√(−x) is the mirror image of √x.'],
+'dilatação vertical':['vertical stretch','The graph of a·f(x), with a > 1, stretches the graph of f vertically; with 0 < a < 1, it squashes it.','2x² is «narrower» than x².'],
+'dilatação horizontal':['horizontal stretch','The graph of f(x/b), with b > 1, stretches the graph of f horizontally; with 0 < b < 1, it squashes it.','√(x/2) grows more slowly than √x.'],
+'família de funções':['family of functions','A set of functions with the same shape that differ in a parameter.','x² + k, with k = −2, 0, 2, 4.'],
+'parâmetro':['parameter','A fixed number in a formula which, when it changes, gives different functions of the same family.','In f(x) = ax + b, a and b are parameters.'],
+'função identidade':['identity function','The function that assigns to each x the same x: id(x) = x.','f ∘ f⁻¹ = id.'],
+'transformação de gráficos':['transformation of graphs','Getting the graph of a new function from a known graph, by translations, reflections and stretches.','y = −(x − 1)² + 3 starts from x².']
+};
+
+TRAD.es = {
+'función':null,
+'função':['función','Correspondencia que a cada elemento de un conjunto A (conjunto de partida) le asocia uno y solo un elemento de un conjunto B (conjunto de llegada).','f: {1, 2, 3} → {a, b, c, d}, con f(1) = a, f(2) = b y f(3) = b.'],
+'objeto':['preimagen (objeto)','Cada elemento del dominio de una función, es decir, cada valor de x al que se aplica la función.','En f(3) = 7, la preimagen es 3.'],
+'imagem':['imagen','Elemento del conjunto de llegada que la función asocia a una preimagen; se escribe f(x).','Si f(x) = 2x + 1, la imagen de 3 es f(3) = 7.'],
+'domínio':['dominio','Conjunto de todas las preimágenes de una función; se representa por D o D_f.','Para f(x) = √x, el dominio es [0, +∞[.'],
+'contradomínio':['recorrido (imagen de la función)','Conjunto de todas las imágenes de una función; está contenido en el conjunto de llegada. Se representa por D′ o D′_f.','Para f(x) = x², con x ∈ ℝ, el recorrido es [0, +∞[.'],
+'correspondência':['correspondencia','Cualquier regla que asocia elementos de un conjunto a elementos de otro; solo es función si cada preimagen tiene una y solo una imagen.','Asociar a cada alumno sus asignaturas preferidas no es una función (puede haber varias).'],
+'variável independente':['variable independiente','La variable cuyos valores se eligen libremente dentro del dominio; normalmente x.','En el precio de un taxi en función de los kilómetros, los kilómetros son la variable independiente.'],
+'variável dependente':['variable dependiente','La variable cuyo valor depende de la independiente; normalmente y = f(x).','El precio a pagar depende de los kilómetros recorridos.'],
+'conjunto de partida':['conjunto de partida','Conjunto donde están las preimágenes; en una función, coincide con el dominio.','En f: A → B, el conjunto de partida es A.'],
+'conjunto de chegada':['conjunto de llegada (codominio)','Conjunto donde se buscan las imágenes; contiene el recorrido, pero puede ser mayor.','En f: ℝ → ℝ, f(x) = x², el conjunto de llegada es ℝ y el recorrido es [0, +∞[.'],
+'expressão analítica':['expresión analítica (fórmula)','Fórmula que permite calcular la imagen de cada preimagen.','f(x) = 3x − 5 es la expresión analítica de f.'],
+'função real de variável real':['función real de variable real','Función cuyo dominio y conjunto de llegada son subconjuntos de ℝ.','g(x) = x² − 1, con x ∈ ℝ.'],
+'f(x)':['f(x)','Notación para la imagen de x por la función f; se lee «f de x».','f(2) = 5 significa que la imagen de 2 es 5.'],
+'igualdade de funções':['igualdad de funciones','Dos funciones son iguales cuando tienen el mismo dominio, el mismo conjunto de llegada y la misma imagen para cada preimagen.','f(x) = x²/x y g(x) = x no son iguales: 0 no pertenece al dominio de f.'],
+'restrição de uma função':['restricción de una función','Función que se obtiene tomando solo una parte del dominio, con la misma expresión.','La restricción de x² a [0, +∞[ es inyectiva.'],
+'domínio de existência':['dominio de definición','El mayor subconjunto de ℝ donde la expresión analítica tiene sentido.','Para f(x) = 1/x, el dominio es ℝ \\ {0}.'],
+'gráfico de uma função':['gráfica de una función','Conjunto de los puntos (x, f(x)) del plano, con x en el dominio.','La gráfica de f(x) = x² es una parábola.'],
+'referencial cartesiano':['sistema de coordenadas cartesianas','Dos ejes numéricos perpendiculares, Ox (abscisas) y Oy (ordenadas), que se cortan en el origen.','El punto (2, 3) está 2 unidades a la derecha y 3 hacia arriba.'],
+'abcissa':['abscisa','Primera coordenada de un punto: se lee en el eje horizontal Ox.','La abscisa de (4, −1) es 4.'],
+'ordenada':['ordenada','Segunda coordenada de un punto: se lee en el eje vertical Oy.','La ordenada de (4, −1) es −1.'],
+'par ordenado':['par ordenado','Par (x, y) en el que el orden importa; cada punto de la gráfica es el par (preimagen, imagen).','(2, 5) y (5, 2) son pares distintos.'],
+'tabela de valores':['tabla de valores','Representación de una función mediante una tabla con preimágenes e imágenes.','x: −2, −1, 0, 1, 2; f(x): 4, 1, 0, 1, 4.'],
+'diagrama sagital':['diagrama sagital (de flechas)','Representación con dos conjuntos y flechas de cada preimagen a su imagen.','Útil para funciones con dominio finito.'],
+'representação algébrica':['representación algebraica','Representación de una función por su expresión analítica.','f(x) = 2x + 1.'],
+'representação verbal':['representación verbal','Descripción de la función con palabras.','«A cada número le asocia su doble más uno.»'],
+'teste da reta vertical':['prueba de la recta vertical','Una curva es la gráfica de una función si ninguna recta vertical la corta en más de un punto.','Una circunferencia no es la gráfica de una función.'],
+'ordenada na origem':['ordenada en el origen','Ordenada del punto donde la gráfica corta el eje Oy; es f(0).','Para f(x) = 2x + 1, la ordenada en el origen es 1.'],
+'pontos de interseção com os eixos':['puntos de corte con los ejes','Con Ox: puntos (x, 0) donde x es un cero de la función; con Oy: el punto (0, f(0)).','f(x) = x² − 4 corta Ox en (−2, 0) y (2, 0), y Oy en (0, −4).'],
+'escala':['escala','Correspondencia entre las unidades de los ejes y la longitud en el papel o la pantalla; los ejes pueden tener escalas distintas.','1 cuadrícula = 10 euros en el eje Oy.'],
+'leitura gráfica':['lectura de gráficas','Obtener información (imágenes, preimágenes, ceros, extremos) observando la gráfica.','Por la gráfica, f(1) ≈ 3.'],
+'função injetiva':['función inyectiva','Función en la que preimágenes distintas tienen siempre imágenes distintas: si x₁ ≠ x₂, entonces f(x₁) ≠ f(x₂).','f(x) = 2x + 1 es inyectiva; f(x) = x² no lo es.'],
+'função sobrejetiva':['función sobreyectiva','Función en la que todos los elementos del conjunto de llegada son imagen de alguna preimagen: recorrido = conjunto de llegada.','f: ℝ → ℝ, f(x) = x³ es sobreyectiva.'],
+'função bijetiva':['función biyectiva','Función inyectiva y sobreyectiva: a cada elemento del conjunto de llegada le corresponde exactamente una preimagen.','f: ℝ → ℝ, f(x) = 2x + 1.'],
+'função não injetiva':['función no inyectiva','Función en la que al menos dos preimágenes distintas tienen la misma imagen.','f(x) = x²: f(−2) = f(2) = 4.'],
+'teste da reta horizontal':['prueba de la recta horizontal','Una función es inyectiva si ninguna recta horizontal corta su gráfica en más de un punto.','La recta y = 1 corta x²/2 − 1 en dos puntos: no es inyectiva.'],
+'função inversa':['función inversa','Función f⁻¹ que deshace lo que hace f: si f(a) = b, entonces f⁻¹(b) = a. Solo existe si f es biyectiva.','f(x) = 2x + 1 tiene inversa f⁻¹(x) = (x − 1)/2.'],
+'correspondência um a um':['correspondencia uno a uno','Otra forma de decir biyección: cada preimagen tiene una imagen y cada imagen viene de una sola preimagen.','Los asientos numerados de un aula y los alumnos sentados, sin asientos vacíos.'],
+'imagem de um conjunto':['imagen de un conjunto','Conjunto de las imágenes de los elementos de un subconjunto del dominio: f(C) = {f(x): x ∈ C}.','Para f(x) = x², f([−1, 2]) = [0, 4].'],
+'simetria em relação a y = x':['simetría respecto de y = x','Las gráficas de f y de f⁻¹ son simétricas respecto de la bisectriz y = x.','El punto (1, 3) de f corresponde a (3, 1) de f⁻¹.'],
+'inversa de uma composição':['inversa de una composición','Para deshacer f después de g: (f ∘ g)⁻¹ = g⁻¹ ∘ f⁻¹.','Ponerse los calcetines y luego los zapatos; para deshacerlo, primero se quitan los zapatos.'],
+'zero de uma função':['cero de una función','Preimagen cuya imagen es 0: x tal que f(x) = 0. En la gráfica, abscisa de un punto donde la gráfica corta Ox.','f(x) = x² − 4 tiene ceros −2 y 2.'],
+'sinal de uma função':['signo de una función','Estudio de los intervalos donde f(x) es positiva, negativa o nula.','f(x) = x² + x − 2 es positiva en ]−∞, −2[ ∪ ]1, +∞[.'],
+'função positiva':['función positiva','f es positiva en un intervalo si f(x) > 0 para todo x de ese intervalo: la gráfica está por encima de Ox.','f(x) = x² + 1 es positiva en ℝ.'],
+'função negativa':['función negativa','f es negativa en un intervalo si f(x) < 0 para todo x de ese intervalo: la gráfica está por debajo de Ox.','f(x) = −x² − 1 es negativa en ℝ.'],
+'quadro de sinal':['tabla de signos','Tabla que resume, por intervalos, el signo de f(x) y sus ceros.','+  0  −  0  + para x² + x − 2.'],
+'raiz':['raíz','Solución de una ecuación; los ceros de f son las raíces de la ecuación f(x) = 0.','x = 3 es raíz de 2x − 6 = 0.'],
+'equação f(x) = 0':['ecuación f(x) = 0','Ecuación cuyas soluciones son los ceros de f.','x² − 4 = 0 ⇔ x = −2 ∨ x = 2.'],
+'inequação f(x) > 0':['inecuación f(x) > 0','Inecuación cuyas soluciones son los valores donde f es positiva; se resuelve con la tabla de signos o la gráfica.','x² − 4 > 0 ⇔ x < −2 ∨ x > 2.'],
+'função sem zeros':['función sin ceros','Función cuya gráfica no toca el eje Ox.','f(x) = x² + 1 no tiene ceros reales.'],
+'zero duplo':['cero doble','Cero en el que la gráfica toca el eje Ox sin atravesarlo; la función no cambia de signo.','f(x) = (x − 1)² tiene un cero doble en 1.'],
+'mudança de sinal':['cambio de signo','En un cero simple, la función pasa de positiva a negativa o al revés.','En x = 1, 2x − 2 pasa de negativa a positiva.'],
+'monotonia':['monotonía','Estudio de los intervalos donde la función es creciente, decreciente o constante.','x³ − 3x crece en ]−∞, −1], decrece en [−1, 1] y crece en [1, +∞[.'],
+'função crescente':['función creciente','En un intervalo, si x₁ < x₂ entonces f(x₁) < f(x₂): la gráfica «sube» de izquierda a derecha.','f(x) = 2x + 1 es creciente en ℝ.'],
+'função decrescente':['función decreciente','En un intervalo, si x₁ < x₂ entonces f(x₁) > f(x₂): la gráfica «baja» de izquierda a derecha.','f(x) = −x + 3 es decreciente en ℝ.'],
+'função constante':['función constante','Función en la que todas las preimágenes tienen la misma imagen; la gráfica es una recta horizontal.','f(x) = 3.'],
+'crescente em sentido lato':['creciente en sentido amplio','Si x₁ < x₂ entonces f(x₁) ≤ f(x₂): puede tener tramos constantes.','Una tarifa que sube por tramos.'],
+'função monótona':['función monótona','Función que, en un intervalo, es siempre creciente o siempre decreciente.','f(x) = x³ es monótona en ℝ.'],
+'intervalo de monotonia':['intervalo de monotonía','Intervalo máximo donde la función mantiene el mismo sentido de variación.','[−1, 1] es un intervalo de monotonía de x³ − 3x.'],
+'quadro de variação':['tabla de variación','Tabla que resume los intervalos de monotonía (↗, ↘) y los extremos.','↗ 2 ↘ −2 ↗ para x³ − 3x.'],
+'extremo':['extremo','Valor máximo o mínimo que alcanza la función, absoluto (en todo el dominio) o relativo (en un entorno).','El vértice de una parábola es un extremo.'],
+'máximo absoluto':['máximo absoluto','La mayor imagen de la función en todo el dominio.','f(x) = −x² + 4 tiene máximo absoluto 4, en x = 0.'],
+'mínimo absoluto':['mínimo absoluto','La menor imagen de la función en todo el dominio.','f(x) = x² + 1 tiene mínimo absoluto 1.'],
+'máximo relativo':['máximo relativo','Imagen que es la mayor en un entorno del punto, aunque pueda haber imágenes mayores en otros puntos.','x³ − 3x tiene máximo relativo 2, en x = −1.'],
+'mínimo relativo':['mínimo relativo','Imagen que es la menor en un entorno del punto.','x³ − 3x tiene mínimo relativo −2, en x = 1.'],
+'maximizante':['punto de máximo (maximizador)','Preimagen donde la función alcanza un máximo.','Para −x² + 4, el punto de máximo es 0.'],
+'minimizante':['punto de mínimo (minimizador)','Preimagen donde la función alcanza un mínimo.','Para x² + 1, el punto de mínimo es 0.'],
+'extremos num intervalo fechado':['extremos en un intervalo cerrado','En un intervalo [a, b], los extremos absolutos pueden estar en el interior o en los extremos del intervalo.','En [−1, 3], −(x − 1)² + 3 tiene máximo 3 y mínimo −1.'],
+'vértice da parábola':['vértice de la parábola','Punto donde la función cuadrática alcanza su extremo; ahí cambia la monotonía.','x² − 2x − 3 tiene vértice (1, −4).'],
+'função par':['función par','Función de dominio simétrico en la que f(−x) = f(x) para todo x; la gráfica es simétrica respecto del eje Oy.','f(x) = x²: f(−2) = f(2) = 4.'],
+'função ímpar':['función impar','Función de dominio simétrico en la que f(−x) = −f(x) para todo x; la gráfica es simétrica respecto del origen.','f(x) = x³: f(−1) = −1 = −f(1).'],
+'nem par nem ímpar':['ni par ni impar','Función que no cumple ninguna de las dos condiciones.','f(x) = x² + x: f(−1) = 0, f(1) = 2.'],
+'domínio simétrico':['dominio simétrico','Dominio en el que, si x pertenece, también pertenece −x; condición necesaria para la paridad.','[−3, 3] es simétrico; [−1, 4] no lo es.'],
+'simetria em relação ao eixo Oy':['simetría respecto del eje Oy','Cada punto (x, y) de la gráfica tiene su pareja (−x, y): la gráfica es igual a ambos lados del eje.','La gráfica de |x|.'],
+'simetria em relação à origem':['simetría respecto del origen','Cada punto (x, y) de la gráfica tiene su pareja (−x, −y): girar media vuelta deja la gráfica igual.','La gráfica de 1/x.'],
+'paridade':['paridad','Propiedad de una función de ser par, impar o ninguna de las dos.','Para estudiar la paridad: calcular f(−x) y compararla con f(x) y −f(x).'],
+'composição de funções':['composición de funciones','Aplicar una función al resultado de otra: (f ∘ g)(x) = f(g(x)).','g(x) = x + 1, f(x) = x²: (f ∘ g)(2) = f(3) = 9.'],
+'soma de funções':['suma de funciones','(f + g)(x) = f(x) + g(x), en el dominio común.','f(x) = x, g(x) = 1: (f + g)(x) = x + 1.'],
+'produto de funções':['producto de funciones','(f × g)(x) = f(x) × g(x), en el dominio común.','x × (x − 1) = x² − x.'],
+'quociente de funções':['cociente de funciones','(f/g)(x) = f(x)/g(x), en el dominio común, excluyendo los ceros de g.','f(x) = 1, g(x) = x: (f/g)(x) = 1/x, con x ≠ 0.'],
+'translação vertical':['traslación vertical','La gráfica de f(x) + k se obtiene desplazando la de f k unidades hacia arriba (k > 0) o hacia abajo (k < 0).','x² + 2 es x² subida 2 unidades.'],
+'translação horizontal':['traslación horizontal','La gráfica de f(x − h) se obtiene desplazando la de f h unidades a la derecha (h > 0) o a la izquierda (h < 0).','(x − 2)² es x² desplazada 2 unidades a la derecha.'],
+'reflexão no eixo Ox':['reflexión en el eje Ox','La gráfica de −f(x) es la simétrica de la de f respecto del eje Ox.','−x² es x² «dada la vuelta».'],
+'reflexão no eixo Oy':['reflexión en el eje Oy','La gráfica de f(−x) es la simétrica de la de f respecto del eje Oy.','√(−x) es la simétrica de √x.'],
+'dilatação vertical':['dilatación vertical','La gráfica de a·f(x), con a > 1, estira la de f en vertical; con 0 < a < 1, la comprime.','2x² es más «cerrada» que x².'],
+'dilatação horizontal':['dilatación horizontal','La gráfica de f(x/b), con b > 1, estira la de f en horizontal; con 0 < b < 1, la comprime.','√(x/2) crece más despacio que √x.'],
+'família de funções':['familia de funciones','Conjunto de funciones con la misma forma, que se diferencian en un parámetro.','x² + k, con k = −2, 0, 2, 4.'],
+'parâmetro':['parámetro','Número fijo en una expresión que, al variar, da funciones distintas de la misma familia.','En f(x) = ax + b, a y b son parámetros.'],
+'função identidade':['función identidad','Función que a cada x le asocia el propio x: id(x) = x.','f ∘ f⁻¹ = id.'],
+'transformação de gráficos':['transformación de gráficas','Obtener la gráfica de una nueva función a partir de una gráfica conocida, mediante traslaciones, reflexiones y dilataciones.','y = −(x − 1)² + 3 parte de x².']
+};
+delete TRAD.es['función'];
+
+TRAD.hi = {
+'função':['फलन','एक संगति जो समुच्चय A (प्रारंभिक समुच्चय) के प्रत्येक अवयव को समुच्चय B (लक्ष्य समुच्चय) के एक और केवल एक अवयव से जोड़ती है।','f: {1, 2, 3} → {a, b, c, d}, जहाँ f(1) = a, f(2) = b और f(3) = b।'],
+'objeto':['पूर्व-प्रतिबिंब (इनपुट)','फलन के प्रांत का प्रत्येक अवयव, अर्थात x का प्रत्येक मान जिस पर फलन लगाया जाता है।','f(3) = 7 में पूर्व-प्रतिबिंब 3 है।'],
+'imagem':['प्रतिबिंब (आउटपुट)','लक्ष्य समुच्चय का वह अवयव जिसे फलन किसी पूर्व-प्रतिबिंब से जोड़ता है; इसे f(x) लिखते हैं।','यदि f(x) = 2x + 1, तो 3 का प्रतिबिंब f(3) = 7 है।'],
+'domínio':['प्रांत','फलन के सभी पूर्व-प्रतिबिंबों का समुच्चय; इसे D या D_f से दर्शाते हैं।','f(x) = √x के लिए प्रांत [0, +∞[ है।'],
+'contradomínio':['परिसर','फलन के सभी प्रतिबिंबों का समुच्चय; यह लक्ष्य समुच्चय में समाहित होता है। इसे D′ या D′_f से दर्शाते हैं।','f(x) = x², x ∈ ℝ के लिए परिसर [0, +∞[ है।'],
+'correspondência':['संगति','कोई भी नियम जो एक समुच्चय के अवयवों को दूसरे समुच्चय के अवयवों से जोड़ता है; यह फलन तभी है जब प्रत्येक पूर्व-प्रतिबिंब का एक और केवल एक प्रतिबिंब हो।','हर छात्र को उसके पसंदीदा विषयों से जोड़ना फलन नहीं है (कई हो सकते हैं)।'],
+'variável independente':['स्वतंत्र चर','वह चर जिसके मान प्रांत के भीतर स्वतंत्र रूप से चुने जाते हैं; प्रायः x।','टैक्सी का किराया किलोमीटर पर निर्भर करता है: किलोमीटर स्वतंत्र चर हैं।'],
+'variável dependente':['आश्रित चर','वह चर जिसका मान स्वतंत्र चर पर निर्भर करता है; प्रायः y = f(x)।','चुकाया जाने वाला किराया तय किए गए किलोमीटर पर निर्भर करता है।'],
+'conjunto de partida':['प्रारंभिक समुच्चय','वह समुच्चय जिसमें पूर्व-प्रतिबिंब होते हैं; फलन में यह प्रांत ही है।','f: A → B में प्रारंभिक समुच्चय A है।'],
+'conjunto de chegada':['लक्ष्य समुच्चय (सहप्रांत)','वह समुच्चय जिसमें प्रतिबिंब खोजे जाते हैं; इसमें परिसर समाहित होता है, पर यह उससे बड़ा भी हो सकता है।','f: ℝ → ℝ, f(x) = x² में लक्ष्य समुच्चय ℝ है और परिसर [0, +∞[ है।'],
+'expressão analítica':['विश्लेषणात्मक व्यंजक (सूत्र)','वह सूत्र जिससे प्रत्येक पूर्व-प्रतिबिंब का प्रतिबिंब निकाला जाता है।','f(x) = 3x − 5, f का विश्लेषणात्मक व्यंजक है।'],
+'função real de variável real':['वास्तविक चर का वास्तविक फलन','ऐसा फलन जिसका प्रांत और लक्ष्य समुच्चय ℝ के उपसमुच्चय हों।','g(x) = x² − 1, जहाँ x ∈ ℝ।'],
+'f(x)':['f(x)','फलन f के अंतर्गत x के प्रतिबिंब का संकेतन; इसे «f ऑफ़ x» पढ़ते हैं।','f(2) = 5 का अर्थ है कि 2 का प्रतिबिंब 5 है।'],
+'igualdade de funções':['फलनों की समता','दो फलन समान होते हैं जब उनका प्रांत, लक्ष्य समुच्चय और प्रत्येक पूर्व-प्रतिबिंब का प्रतिबिंब एक ही हो।','f(x) = x²/x और g(x) = x समान नहीं हैं: 0, f के प्रांत में नहीं है।'],
+'restrição de uma função':['फलन का प्रतिबंध','वही सूत्र रखते हुए प्रांत के केवल एक भाग को लेकर प्राप्त फलन।','x² का [0, +∞[ पर प्रतिबंध एकैकी है।'],
+'domínio de existência':['प्राकृतिक प्रांत','ℝ का सबसे बड़ा उपसमुच्चय जहाँ विश्लेषणात्मक व्यंजक सार्थक हो।','f(x) = 1/x के लिए प्रांत ℝ \\ {0} है।'],
+'gráfico de uma função':['फलन का आलेख','तल के बिंदुओं (x, f(x)) का समुच्चय, जहाँ x प्रांत में है।','f(x) = x² का आलेख एक परवलय है।'],
+'referencial cartesiano':['कार्तीय निर्देशांक पद्धति','दो लंबवत संख्या अक्ष, Ox (x-अक्ष) और Oy (y-अक्ष), जो मूलबिंदु पर काटते हैं।','बिंदु (2, 3) दाईं ओर 2 इकाई और ऊपर 3 इकाई पर है।'],
+'abcissa':['भुज (x-निर्देशांक)','किसी बिंदु का पहला निर्देशांक: क्षैतिज अक्ष Ox पर पढ़ा जाता है।','(4, −1) का भुज 4 है।'],
+'ordenada':['कोटि (y-निर्देशांक)','किसी बिंदु का दूसरा निर्देशांक: ऊर्ध्वाधर अक्ष Oy पर पढ़ा जाता है।','(4, −1) की कोटि −1 है।'],
+'par ordenado':['क्रमित युग्म','युग्म (x, y) जिसमें क्रम महत्वपूर्ण है; आलेख का प्रत्येक बिंदु (पूर्व-प्रतिबिंब, प्रतिबिंब) युग्म है।','(2, 5) और (5, 2) भिन्न युग्म हैं।'],
+'tabela de valores':['मान सारणी','पूर्व-प्रतिबिंबों और उनके प्रतिबिंबों की सारणी द्वारा फलन का निरूपण।','x: −2, −1, 0, 1, 2; f(x): 4, 1, 0, 1, 4।'],
+'diagrama sagital':['तीर आरेख','दो समुच्चयों और प्रत्येक पूर्व-प्रतिबिंब से उसके प्रतिबिंब तक तीरों वाला निरूपण।','परिमित प्रांत वाले फलनों के लिए उपयोगी।'],
+'representação algébrica':['बीजीय निरूपण','फलन को उसके विश्लेषणात्मक व्यंजक द्वारा दर्शाना।','f(x) = 2x + 1।'],
+'representação verbal':['शाब्दिक निरूपण','फलन का शब्दों में वर्णन।','«प्रत्येक संख्या को उसके दुगने में एक जोड़कर जोड़ता है।»'],
+'teste da reta vertical':['ऊर्ध्वाधर रेखा परीक्षण','कोई वक्र फलन का आलेख है यदि कोई भी ऊर्ध्वाधर रेखा उसे एक से अधिक बिंदु पर न काटे।','वृत्त किसी फलन का आलेख नहीं है।'],
+'ordenada na origem':['y-अंतःखंड','उस बिंदु की कोटि जहाँ आलेख Oy अक्ष को काटता है; यह f(0) है।','f(x) = 2x + 1 के लिए y-अंतःखंड 1 है।'],
+'pontos de interseção com os eixos':['अक्षों के साथ प्रतिच्छेद बिंदु','Ox के साथ: बिंदु (x, 0) जहाँ x फलन का शून्यक है; Oy के साथ: बिंदु (0, f(0))।','f(x) = x² − 4, Ox को (−2, 0) और (2, 0) पर तथा Oy को (0, −4) पर काटता है।'],
+'escala':['पैमाना','अक्षों की इकाइयों और कागज़ या स्क्रीन पर लंबाई के बीच संबंध; अक्षों के पैमाने भिन्न हो सकते हैं।','Oy अक्ष पर 1 खाना = 10 यूरो।'],
+'leitura gráfica':['आलेख पढ़ना','आलेख देखकर जानकारी (प्रतिबिंब, पूर्व-प्रतिबिंब, शून्यक, चरम मान) प्राप्त करना।','आलेख से, f(1) ≈ 3।'],
+'função injetiva':['एकैकी फलन','ऐसा फलन जिसमें भिन्न पूर्व-प्रतिबिंबों के प्रतिबिंब सदा भिन्न हों: यदि x₁ ≠ x₂, तो f(x₁) ≠ f(x₂)।','f(x) = 2x + 1 एकैकी है; f(x) = x² नहीं है।'],
+'função sobrejetiva':['आच्छादक फलन','ऐसा फलन जिसमें लक्ष्य समुच्चय का हर अवयव किसी पूर्व-प्रतिबिंब का प्रतिबिंब हो: परिसर = लक्ष्य समुच्चय।','f: ℝ → ℝ, f(x) = x³ आच्छादक है।'],
+'função bijetiva':['एकैकी आच्छादक फलन (द्विअंतःक्षेपी)','ऐसा फलन जो एकैकी और आच्छादक दोनों हो: लक्ष्य समुच्चय के प्रत्येक अवयव का ठीक एक पूर्व-प्रतिबिंब होता है।','f: ℝ → ℝ, f(x) = 2x + 1।'],
+'função não injetiva':['बहु-एक फलन (एकैकी नहीं)','ऐसा फलन जिसमें कम से कम दो भिन्न पूर्व-प्रतिबिंबों का प्रतिबिंब एक ही हो।','f(x) = x²: f(−2) = f(2) = 4।'],
+'teste da reta horizontal':['क्षैतिज रेखा परीक्षण','फलन एकैकी है यदि कोई भी क्षैतिज रेखा उसके आलेख को एक से अधिक बिंदु पर न काटे।','रेखा y = 1, x²/2 − 1 को दो बिंदुओं पर काटती है: यह एकैकी नहीं है।'],
+'função inversa':['प्रतिलोम फलन','फलन f⁻¹ जो f के काम को उलट देता है: यदि f(a) = b, तो f⁻¹(b) = a। यह तभी होता है जब f एकैकी आच्छादक हो।','f(x) = 2x + 1 का प्रतिलोम f⁻¹(x) = (x − 1)/2 है।'],
+'correspondência um a um':['एक-एक संगति','एकैकी आच्छादक फलन का दूसरा नाम: हर पूर्व-प्रतिबिंब का एक प्रतिबिंब और हर प्रतिबिंब एक ही पूर्व-प्रतिबिंब से।','कक्षा की क्रमांकित सीटें और बैठे छात्र, कोई सीट खाली नहीं।'],
+'imagem de um conjunto':['समुच्चय का प्रतिबिंब','प्रांत के किसी उपसमुच्चय के अवयवों के प्रतिबिंबों का समुच्चय: f(C) = {f(x): x ∈ C}।','f(x) = x² के लिए, f([−1, 2]) = [0, 4]।'],
+'simetria em relação a y = x':['रेखा y = x के सापेक्ष सममिति','f और f⁻¹ के आलेख रेखा y = x के सापेक्ष सममित होते हैं।','f का बिंदु (1, 3), f⁻¹ के बिंदु (3, 1) के संगत है।'],
+'inversa de uma composição':['संयुक्त फलन का प्रतिलोम','g के बाद f को उलटने के लिए: (f ∘ g)⁻¹ = g⁻¹ ∘ f⁻¹।','पहले मोज़े और फिर जूते; उलटने के लिए पहले जूते उतारते हैं।'],
+'zero de uma função':['फलन का शून्यक','वह पूर्व-प्रतिबिंब जिसका प्रतिबिंब 0 है: x जिसके लिए f(x) = 0। आलेख पर, उस बिंदु का भुज जहाँ आलेख Ox को काटता है।','f(x) = x² − 4 के शून्यक −2 और 2 हैं।'],
+'sinal de uma função':['फलन का चिह्न','उन अंतरालों का अध्ययन जहाँ f(x) धनात्मक, ऋणात्मक या शून्य है।','f(x) = x² + x − 2, ]−∞, −2[ ∪ ]1, +∞[ में धनात्मक है।'],
+'função positiva':['धनात्मक फलन','किसी अंतराल में f धनात्मक है यदि उस अंतराल के प्रत्येक x के लिए f(x) > 0: आलेख Ox के ऊपर है।','f(x) = x² + 1, ℝ पर धनात्मक है।'],
+'função negativa':['ऋणात्मक फलन','किसी अंतराल में f ऋणात्मक है यदि उस अंतराल के प्रत्येक x के लिए f(x) < 0: आलेख Ox के नीचे है।','f(x) = −x² − 1, ℝ पर ऋणात्मक है।'],
+'quadro de sinal':['चिह्न सारणी','सारणी जो अंतरालों के अनुसार f(x) का चिह्न और उसके शून्यक दिखाती है।','x² + x − 2 के लिए: +  0  −  0  +।'],
+'raiz':['मूल','किसी समीकरण का हल; f के शून्यक समीकरण f(x) = 0 के मूल हैं।','x = 3, 2x − 6 = 0 का मूल है।'],
+'equação f(x) = 0':['समीकरण f(x) = 0','वह समीकरण जिसके हल f के शून्यक हैं।','x² − 4 = 0 ⇔ x = −2 ∨ x = 2।'],
+'inequação f(x) > 0':['असमिका f(x) > 0','वह असमिका जिसके हल वे मान हैं जहाँ f धनात्मक है; इसे चिह्न सारणी या आलेख से हल करते हैं।','x² − 4 > 0 ⇔ x < −2 ∨ x > 2।'],
+'função sem zeros':['शून्यक रहित फलन','ऐसा फलन जिसका आलेख Ox अक्ष को नहीं छूता।','f(x) = x² + 1 का कोई वास्तविक शून्यक नहीं है।'],
+'zero duplo':['द्विगुण शून्यक','ऐसा शून्यक जहाँ आलेख Ox अक्ष को छूता है पर पार नहीं करता; फलन का चिह्न नहीं बदलता।','f(x) = (x − 1)² का 1 पर द्विगुण शून्यक है।'],
+'mudança de sinal':['चिह्न परिवर्तन','सरल शून्यक पर फलन धनात्मक से ऋणात्मक या इसके विपरीत हो जाता है।','x = 1 पर, 2x − 2 ऋणात्मक से धनात्मक हो जाता है।'],
+'monotonia':['एकदिष्टता','उन अंतरालों का अध्ययन जहाँ फलन वर्धमान, ह्रासमान या अचर है।','x³ − 3x, ]−∞, −1] में बढ़ता है, [−1, 1] में घटता है और [1, +∞[ में बढ़ता है।'],
+'função crescente':['वर्धमान फलन','किसी अंतराल में, यदि x₁ < x₂ तो f(x₁) < f(x₂): आलेख बाएँ से दाएँ «ऊपर चढ़ता» है।','f(x) = 2x + 1, ℝ पर वर्धमान है।'],
+'função decrescente':['ह्रासमान फलन','किसी अंतराल में, यदि x₁ < x₂ तो f(x₁) > f(x₂): आलेख बाएँ से दाएँ «नीचे उतरता» है।','f(x) = −x + 3, ℝ पर ह्रासमान है।'],
+'função constante':['अचर फलन','ऐसा फलन जिसमें सभी पूर्व-प्रतिबिंबों का प्रतिबिंब एक ही हो; आलेख एक क्षैतिज रेखा है।','f(x) = 3।'],
+'crescente em sentido lato':['अह्रासमान फलन (व्यापक अर्थ में वर्धमान)','यदि x₁ < x₂ तो f(x₁) ≤ f(x₂): इसमें अचर भाग हो सकते हैं।','स्तरों में बढ़ने वाला शुल्क।'],
+'função monótona':['एकदिष्ट फलन','ऐसा फलन जो किसी अंतराल में सदा वर्धमान या सदा ह्रासमान हो।','f(x) = x³, ℝ पर एकदिष्ट है।'],
+'intervalo de monotonia':['एकदिष्टता का अंतराल','सबसे बड़ा अंतराल जहाँ फलन परिवर्तन की एक ही दिशा बनाए रखता है।','[−1, 1], x³ − 3x की एकदिष्टता का एक अंतराल है।'],
+'quadro de variação':['परिवर्तन सारणी','सारणी जो एकदिष्टता के अंतराल (↗, ↘) और चरम मान दिखाती है।','x³ − 3x के लिए: ↗ 2 ↘ −2 ↗।'],
+'extremo':['चरम मान','फलन द्वारा प्राप्त उच्चिष्ठ या निम्निष्ठ मान, निरपेक्ष (पूरे प्रांत में) या स्थानीय (किसी बिंदु के पास)।','परवलय का शीर्ष एक चरम मान है।'],
+'máximo absoluto':['निरपेक्ष उच्चिष्ठ','पूरे प्रांत में फलन का सबसे बड़ा प्रतिबिंब।','f(x) = −x² + 4 का निरपेक्ष उच्चिष्ठ 4 है, x = 0 पर।'],
+'mínimo absoluto':['निरपेक्ष निम्निष्ठ','पूरे प्रांत में फलन का सबसे छोटा प्रतिबिंब।','f(x) = x² + 1 का निरपेक्ष निम्निष्ठ 1 है।'],
+'máximo relativo':['स्थानीय उच्चिष्ठ','वह प्रतिबिंब जो किसी बिंदु के पास सबसे बड़ा हो, भले ही अन्य स्थानों पर बड़े प्रतिबिंब हों।','x³ − 3x का स्थानीय उच्चिष्ठ 2 है, x = −1 पर।'],
+'mínimo relativo':['स्थानीय निम्निष्ठ','वह प्रतिबिंब जो किसी बिंदु के पास सबसे छोटा हो।','x³ − 3x का स्थानीय निम्निष्ठ −2 है, x = 1 पर।'],
+'maximizante':['उच्चिष्ठ बिंदु','वह पूर्व-प्रतिबिंब जहाँ फलन उच्चिष्ठ प्राप्त करता है।','−x² + 4 के लिए उच्चिष्ठ बिंदु 0 है।'],
+'minimizante':['निम्निष्ठ बिंदु','वह पूर्व-प्रतिबिंब जहाँ फलन निम्निष्ठ प्राप्त करता है।','x² + 1 के लिए निम्निष्ठ बिंदु 0 है।'],
+'extremos num intervalo fechado':['संवृत अंतराल में चरम मान','अंतराल [a, b] में निरपेक्ष चरम मान भीतर या अंत्य बिंदुओं पर हो सकते हैं।','[−1, 3] में −(x − 1)² + 3 का उच्चिष्ठ 3 और निम्निष्ठ −1 है।'],
+'vértice da parábola':['परवलय का शीर्ष','वह बिंदु जहाँ द्विघात फलन अपना चरम मान प्राप्त करता है; वहाँ एकदिष्टता बदलती है।','x² − 2x − 3 का शीर्ष (1, −4) है।'],
+'função par':['सम फलन','सममित प्रांत वाला फलन जिसमें प्रत्येक x के लिए f(−x) = f(x); आलेख Oy अक्ष के सापेक्ष सममित है।','f(x) = x²: f(−2) = f(2) = 4।'],
+'função ímpar':['विषम फलन','सममित प्रांत वाला फलन जिसमें प्रत्येक x के लिए f(−x) = −f(x); आलेख मूलबिंदु के सापेक्ष सममित है।','f(x) = x³: f(−1) = −1 = −f(1)।'],
+'nem par nem ímpar':['न सम न विषम','ऐसा फलन जो दोनों में से कोई भी शर्त पूरी नहीं करता।','f(x) = x² + x: f(−1) = 0, f(1) = 2।'],
+'domínio simétrico':['सममित प्रांत','ऐसा प्रांत जिसमें यदि x है तो −x भी है; सम-विषम होने के लिए आवश्यक शर्त।','[−3, 3] सममित है; [−1, 4] नहीं है।'],
+'simetria em relação ao eixo Oy':['Oy अक्ष के सापेक्ष सममिति','आलेख के प्रत्येक बिंदु (x, y) का जोड़ा (−x, y) होता है: आलेख अक्ष के दोनों ओर एक जैसा है।','|x| का आलेख।'],
+'simetria em relação à origem':['मूलबिंदु के सापेक्ष सममिति','आलेख के प्रत्येक बिंदु (x, y) का जोड़ा (−x, −y) होता है: आधा घुमाने पर आलेख वैसा ही रहता है।','1/x का आलेख।'],
+'paridade':['सम-विषमता','फलन का सम, विषम या दोनों में से कोई नहीं होने का गुण।','सम-विषमता जाँचने के लिए: f(−x) निकालें और उसकी तुलना f(x) और −f(x) से करें।'],
+'composição de funções':['फलनों का संयोजन (संयुक्त फलन)','एक फलन को दूसरे फलन के परिणाम पर लगाना: (f ∘ g)(x) = f(g(x))।','g(x) = x + 1, f(x) = x²: (f ∘ g)(2) = f(3) = 9।'],
+'soma de funções':['फलनों का योग','(f + g)(x) = f(x) + g(x), उभयनिष्ठ प्रांत पर।','f(x) = x, g(x) = 1: (f + g)(x) = x + 1।'],
+'produto de funções':['फलनों का गुणनफल','(f × g)(x) = f(x) × g(x), उभयनिष्ठ प्रांत पर।','x × (x − 1) = x² − x।'],
+'quociente de funções':['फलनों का भागफल','(f/g)(x) = f(x)/g(x), उभयनिष्ठ प्रांत पर, g के शून्यकों को छोड़कर।','f(x) = 1, g(x) = x: (f/g)(x) = 1/x, जहाँ x ≠ 0।'],
+'translação vertical':['ऊर्ध्वाधर स्थानांतरण','f(x) + k का आलेख, f के आलेख को k इकाई ऊपर (k > 0) या नीचे (k < 0) खिसकाने से मिलता है।','x² + 2, x² को 2 इकाई ऊपर खिसकाने से मिलता है।'],
+'translação horizontal':['क्षैतिज स्थानांतरण','f(x − h) का आलेख, f के आलेख को h इकाई दाईं ओर (h > 0) या बाईं ओर (h < 0) खिसकाने से मिलता है।','(x − 2)², x² को 2 इकाई दाईं ओर खिसकाने से मिलता है।'],
+'reflexão no eixo Ox':['Ox अक्ष में परावर्तन','−f(x) का आलेख, Ox अक्ष के सापेक्ष f के आलेख का दर्पण प्रतिबिंब है।','−x², x² को «उलटा» करने से मिलता है।'],
+'reflexão no eixo Oy':['Oy अक्ष में परावर्तन','f(−x) का आलेख, Oy अक्ष के सापेक्ष f के आलेख का दर्पण प्रतिबिंब है।','√(−x), √x का दर्पण प्रतिबिंब है।'],
+'dilatação vertical':['ऊर्ध्वाधर विस्तारण','a·f(x) का आलेख, a > 1 होने पर f के आलेख को ऊर्ध्वाधर खींचता है; 0 < a < 1 होने पर सिकोड़ता है।','2x², x² से अधिक «सँकरा» है।'],
+'dilatação horizontal':['क्षैतिज विस्तारण','f(x/b) का आलेख, b > 1 होने पर f के आलेख को क्षैतिज खींचता है; 0 < b < 1 होने पर सिकोड़ता है।','√(x/2), √x से धीरे बढ़ता है।'],
+'família de funções':['फलनों का कुल','एक ही आकार वाले फलनों का समुच्चय, जो किसी प्राचल में भिन्न होते हैं।','x² + k, जहाँ k = −2, 0, 2, 4।'],
+'parâmetro':['प्राचल','व्यंजक में एक नियत संख्या जो बदलने पर उसी कुल के भिन्न फलन देती है।','f(x) = ax + b में a और b प्राचल हैं।'],
+'função identidade':['तत्समक फलन','वह फलन जो प्रत्येक x को स्वयं x से जोड़ता है: id(x) = x।','f ∘ f⁻¹ = id।'],
+'transformação de gráficos':['आलेखों का रूपांतरण','स्थानांतरण, परावर्तन और विस्तारण द्वारा किसी ज्ञात आलेख से नए फलन का आलेख प्राप्त करना।','y = −(x − 1)² + 3, x² से आरंभ होता है।']
 };
 
 /* Prova: para cada termo, duas definições quase certas (o erro está num pormenor) */
@@ -486,6 +838,324 @@ const DISTRATORES = {
 'função identidade':['Função que a cada x associa o seu simétrico: id(x) = −x.','Função que a cada x associa sempre o mesmo número: id(x) = 1.'],
 'transformação de gráficos':['Obter a expressão de uma nova função a partir de uma tabela conhecida, por translações, reflexões e dilatações.','Obter o gráfico de uma nova função a partir de um gráfico conhecido, apenas por translações.']
 };
+
+/* textos da prova nas quatro línguas */
+const PROVA_UI = {
+pt: { pEscolhe:'Escolhe a definição correta:', pCerto:'Certo! ✓', pErrado:'Não é esta. A definição correta está assinalada a verde: repara no pormenor que as distingue.',
+  pVoltarSem:'↩ Voltar sem responder', pContinuar:'Continuar ▸', pRespondidas:(n,N,f) => `Respondidas <b>${n}</b> de ${N} · faltam <b>${f}</b>`,
+  pTitulo:'Prova · Generalidades sobre Funções',
+  pInstr:['Com o léxico fechado, escolhe em cada palavra a <b>definição correta</b>, entre três muito parecidas: a diferença está nos pormenores.','Navegas pelos temas e pelos círculos como no léxico. Cada palavra respondida sai do círculo. As palavras ficam em português; as definições aparecem na tua língua.','O cronómetro começa quando tocares em «Começar». No fim, envias o resultado ao professor.'],
+  pNome:'O teu nome', pNomePh:'Nome e apelido', pNomeFalta:'Escreve o teu nome, por favor', pComecar:'Começar ▸', pPorta:(h,f) => `A prova começa às ${h} · faltam ${f}`,
+  pFimTit:'Prova concluída ✓', pFim:(nome,c,N,pc,t) => `${nome ? nome + ', a' : 'A'}certaste em ${c} de ${N} definições (${pc} %), em ${t}.`,
+  pRever:' Vale a pena rever estas palavras no léxico:', pExcelente:' Excelente!', pMail:'✉ Enviar ao professor', pClass:'📋 Entregar no Classroom', pCopiado:'✓ Resultado copiado',
+  pClassInstr:'No Classroom, abre o trabalho desta prova, cola o resultado num comentário privado e carrega em «Entregar».',
+  pEnviado:'✓ Resultado enviado ao professor.', pNaoEnviado:'Não foi possível enviar automaticamente: usa os botões abaixo.', pLingua:'Língua' },
+en: { pEscolhe:'Choose the correct definition:', pCerto:'Correct! ✓', pErrado:'Not this one. The correct definition is marked in green: look at the detail that makes the difference.',
+  pVoltarSem:'↩ Back without answering', pContinuar:'Continue ▸', pRespondidas:(n,N,f) => `Answered <b>${n}</b> of ${N} · <b>${f}</b> to go`,
+  pTitulo:'Test · General properties of functions',
+  pInstr:['With the lexicon closed, choose for each word the <b>correct definition</b> among three very similar ones: the difference is in the details.','Move through the topics and circles as in the lexicon. Each answered word leaves the circle. The words stay in Portuguese; the definitions appear in your language.','The stopwatch starts when you tap «Start». At the end, you send the result to the teacher.'],
+  pNome:'Your name', pNomePh:'First name and surname', pNomeFalta:'Please type your name', pComecar:'Start ▸', pPorta:(h,f) => `The test starts at ${h} · ${f} to go`,
+  pFimTit:'Test completed ✓', pFim:(nome,c,N,pc,t) => `${nome ? nome + ', you' : 'You'} got ${c} of ${N} definitions right (${pc} %), in ${t}.`,
+  pRever:' It is worth reviewing these words in the lexicon:', pExcelente:' Excellent!', pMail:'✉ Send to the teacher', pClass:'📋 Hand in on Classroom', pCopiado:'✓ Result copied',
+  pClassInstr:'In Classroom, open this test’s assignment, paste the result in a private comment and press «Hand in».',
+  pEnviado:'✓ Result sent to the teacher.', pNaoEnviado:'It could not be sent automatically: use the buttons below.', pLingua:'Language' },
+es: { pEscolhe:'Elige la definición correcta:', pCerto:'¡Correcto! ✓', pErrado:'No es esta. La definición correcta está marcada en verde: fíjate en el detalle que las distingue.',
+  pVoltarSem:'↩ Volver sin responder', pContinuar:'Continuar ▸', pRespondidas:(n,N,f) => `Respondidas <b>${n}</b> de ${N} · faltan <b>${f}</b>`,
+  pTitulo:'Prueba · Generalidades sobre funciones',
+  pInstr:['Con el léxico cerrado, elige en cada palabra la <b>definición correcta</b> entre tres muy parecidas: la diferencia está en los detalles.','Recorre los temas y los círculos como en el léxico. Cada palabra respondida sale del círculo. Las palabras siguen en portugués; las definiciones aparecen en tu idioma.','El cronómetro empieza cuando toques «Empezar». Al final, envías el resultado al profesor.'],
+  pNome:'Tu nombre', pNomePh:'Nombre y apellido', pNomeFalta:'Escribe tu nombre, por favor', pComecar:'Empezar ▸', pPorta:(h,f) => `La prueba empieza a las ${h} · faltan ${f}`,
+  pFimTit:'Prueba terminada ✓', pFim:(nome,c,N,pc,t) => `${nome ? nome + ', has' : 'Has'} acertado ${c} de ${N} definiciones (${pc} %), en ${t}.`,
+  pRever:' Vale la pena repasar estas palabras en el léxico:', pExcelente:' ¡Excelente!', pMail:'✉ Enviar al profesor', pClass:'📋 Entregar en Classroom', pCopiado:'✓ Resultado copiado',
+  pClassInstr:'En Classroom, abre la tarea de esta prueba, pega el resultado en un comentario privado y pulsa «Entregar».',
+  pEnviado:'✓ Resultado enviado al profesor.', pNaoEnviado:'No se pudo enviar automáticamente: usa los botones de abajo.', pLingua:'Idioma' },
+hi: { pEscolhe:'सही परिभाषा चुनें:', pCerto:'सही! ✓', pErrado:'यह नहीं। सही परिभाषा हरे रंग में चिह्नित है: उस बारीकी पर ध्यान दें जो उन्हें अलग करती है।',
+  pVoltarSem:'↩ बिना उत्तर दिए लौटें', pContinuar:'आगे बढ़ें ▸', pRespondidas:(n,N,f) => `उत्तर दिए <b>${n}</b> / ${N} · बाकी <b>${f}</b>`,
+  pTitulo:'परीक्षा · फलनों की सामान्य बातें',
+  pInstr:['शब्दकोश बंद रखकर, हर शब्द के लिए तीन बहुत मिलती-जुलती परिभाषाओं में से <b>सही परिभाषा</b> चुनें: अंतर बारीकियों में है।','शब्दकोश की तरह विषयों और वृत्तों में घूमें। उत्तर दिया गया हर शब्द वृत्त से हट जाता है। शब्द पुर्तगाली में रहते हैं; परिभाषाएँ आपकी भाषा में दिखती हैं।','«शुरू करें» दबाते ही स्टॉपवॉच चलने लगती है। अंत में आप परिणाम शिक्षक को भेजते हैं।'],
+  pNome:'आपका नाम', pNomePh:'नाम और उपनाम', pNomeFalta:'कृपया अपना नाम लिखें', pComecar:'शुरू करें ▸', pPorta:(h,f) => `परीक्षा ${h} बजे शुरू होगी · ${f} बाकी`,
+  pFimTit:'परीक्षा पूरी हुई ✓', pFim:(nome,c,N,pc,t) => `${nome ? nome + ', आ' : 'आ'}पने ${N} में से ${c} परिभाषाएँ सही चुनीं (${pc} %), ${t} में।`,
+  pRever:' इन शब्दों को शब्दकोश में फिर से देखना उपयोगी होगा:', pExcelente:' उत्कृष्ट!', pMail:'✉ शिक्षक को भेजें', pClass:'📋 Classroom में जमा करें', pCopiado:'✓ परिणाम कॉपी हुआ',
+  pClassInstr:'Classroom में इस परीक्षा का कार्य खोलें, परिणाम को निजी टिप्पणी में चिपकाएँ और «जमा करें» दबाएँ।',
+  pEnviado:'✓ परिणाम शिक्षक को भेज दिया गया।', pNaoEnviado:'स्वचालित रूप से नहीं भेजा जा सका: नीचे दिए बटन का उपयोग करें।', pLingua:'भाषा' }
+};
+const DIST_TR = {};
+
+DIST_TR.en = {
+'função':['A correspondence that assigns to each element of a set A (the starting set) at least one element of a set B (the target set).','A correspondence that assigns to each element of a set B (the target set) one and only one element of a set A (the starting set).'],
+'objeto':['Each element of the range of a function, that is, each value of y that the function produces.','Each element of the target set of a function, that is, each value that x can take.'],
+'imagem':['The element of the starting set that the function assigns to an object; it is written f(x).','The element of the target set that the function assigns to an object; it is written x.'],
+'domínio':['The set of all the images of a function; written D or D_f.','The set of some of the objects of a function, those whose image is positive; written D or D_f.'],
+'contradomínio':['The set of all the images of a function; it always contains the target set. Written D′ or D′_f.','The set of all the objects of a function; it is contained in the target set. Written D′ or D′_f.'],
+'correspondência':['A rule that associates elements of one set with elements of another; it is always a function, even if an object has several images.','A rule that associates elements of one set with elements of another; it is only a function if each image has one and only one object.'],
+'variável independente':['The variable whose values depend on the other variable; usually y.','The variable whose values are chosen freely within the range; usually y.'],
+'variável dependente':['The variable whose value is chosen freely; usually x.','The variable whose value depends on the independent one; usually x = f(y).'],
+'conjunto de partida':['The set where the images are; for a function, it is the range.','The set where the objects are; for a function, it always contains the domain without being equal to it.'],
+'conjunto de chegada':['The set where the images are looked for; it is always equal to the range.','The set where the images are looked for; it is contained in the range but may be smaller.'],
+'expressão analítica':['A formula that lets you calculate the object from each image.','A table that lets you read the image of each object.'],
+'função real de variável real':['A function whose domain is a subset of ℝ, the target set being any set.','A function whose domain and target set are subsets of ℕ.'],
+'f(x)':['Notation for the object whose image under the function f is x; read «f of x».','Notation for the product of f and x; read «f times x».'],
+'igualdade de funções':['Two functions are equal when they have the same analytic expression, even if their domains are different.','Two functions are equal when they have the same domain and the same range, even if the images are different.'],
+'restrição de uma função':['The function obtained by keeping only part of the domain and changing the formula.','The function obtained by keeping only part of the target set, with the same formula.'],
+'domínio de existência':['The smallest subset of ℝ where the analytic expression makes sense.','The largest subset of ℝ where the analytic expression is positive.'],
+'gráfico de uma função':['The set of points (f(x), x) of the plane, with x in the domain.','The set of points (x, f(x)) of the plane, with x in the range.'],
+'referencial cartesiano':['Two parallel number axes, Ox (x-axis) and Oy (y-axis), that cross at the origin.','Two perpendicular number axes, Ox (y-axis) and Oy (x-axis), that cross at the origin.'],
+'abcissa':['The second coordinate of a point: read on the horizontal axis Ox.','The first coordinate of a point: read on the vertical axis Oy.'],
+'ordenada':['The first coordinate of a point: read on the vertical axis Oy.','The second coordinate of a point: read on the horizontal axis Ox.'],
+'par ordenado':['A pair (x, y) in which order does not matter; each point of the graph is the pair (object, image).','A pair (x, y) in which order matters; each point of the graph is the pair (image, object).'],
+'tabela de valores':['A representation of a function by a table with objects and their zeros.','A representation of a function by a table that shows only the positive images.'],
+'diagrama sagital':['A representation with two sets and arrows from each image to its object.','A representation with a single set and arrows between its elements.'],
+'representação algébrica':['Representing a function by its graph.','Representing a function by its table of values.'],
+'representação verbal':['Describing the function by a formula.','Describing the function by an arrow diagram.'],
+'teste da reta vertical':['A curve is the graph of a function if no horizontal line cuts it at more than one point.','A curve is the graph of a function if every vertical line cuts it at two points.'],
+'ordenada na origem':['The x-coordinate of the point where the graph meets the Ox axis; it is the zero of f.','The y-coordinate of the point where the graph meets the Oy axis; it is f(1).'],
+'pontos de interseção com os eixos':['With Ox: points (0, y) where y is a zero of the function; with Oy: the point (f(0), 0).','With Ox: points (x, 0) where x is a zero of the function; with Oy: the point (0, f(1)).'],
+'escala':['The correspondence between the units on the axes and the length on paper or screen; both axes must always have the same scale.','The number of points marked on each axis of a coordinate system.'],
+'leitura gráfica':['Getting information (images, objects, zeros, extrema) by solving the analytic expression.','Drawing the graph from a table of values.'],
+'função injetiva':['A function in which equal objects always have equal images: if x₁ = x₂, then f(x₁) = f(x₂).','A function in which different objects may have the same image: if x₁ ≠ x₂, then f(x₁) may equal f(x₂).'],
+'função sobrejetiva':['A function in which every element of the starting set has an image: domain = starting set.','A function in which every element of the target set is the image of two or more objects.'],
+'função bijetiva':['A function that is injective or surjective: one of the two properties is enough.','A function that is injective and surjective: each element of the target set corresponds to at least two objects.'],
+'função não injetiva':['A function in which at least one object has two different images.','A function in which all objects have the same image.'],
+'teste da reta horizontal':['A function is injective if no vertical line cuts its graph at more than one point.','A function is injective if some horizontal line cuts its graph at two points.'],
+'função inversa':['The function f⁻¹ that undoes what f does: if f(a) = b, then f⁻¹(a) = b. It always exists, for any function.','The function f⁻¹ = 1/f, which undoes what f does. It only exists if f is bijective.'],
+'correspondência um a um':['Another name for an injection: each object has an image, but there may be images with no object and objects with the same image.','Another name for a surjection: each image comes from at least one object.'],
+'imagem de um conjunto':['The set of objects whose images belong to a subset of the target set.','The set of the images of all the elements of the domain, whatever subset is chosen.'],
+'simetria em relação a y = x':['The graphs of f and f⁻¹ are symmetric about the Oy axis.','The graphs of f and f⁻¹ are symmetric about the line y = −x.'],
+'inversa de uma composição':['To undo f after g: (f ∘ g)⁻¹ = f⁻¹ ∘ g⁻¹.','To undo f after g: (f ∘ g)⁻¹ = g ∘ f.'],
+'zero de uma função':['An object whose image is 1: x such that f(x) = 1. On the graph, the x-coordinate of a point where the graph meets Ox.','The image of the object 0: f(0). On the graph, the y-coordinate of the point where the graph meets Oy.'],
+'sinal de uma função':['Studying the intervals where f(x) is increasing, decreasing or constant.','Studying the intervals where x is positive, negative or zero.'],
+'função positiva':['f is positive on an interval if f(x) ≥ 0 for some x in it: the graph touches Ox.','f is positive on an interval if x > 0 for every x in it: the graph is to the right of Oy.'],
+'função negativa':['f is negative on an interval if f(x) < 0 for some x in it: part of the graph is below Ox.','f is negative on an interval if f(x) < 0 for every x in it: the graph is above Ox.'],
+'quadro de sinal':['A table that summarises, by intervals, the monotonicity of f and its extrema.','A table that summarises, by intervals, the sign of x and its zeros.'],
+'raiz':['A solution of an equation; the zeros of f are the roots of the equation f(x) = 1.','A solution of an equation; the zeros of f are the roots of the equation f(0) = x.'],
+'equação f(x) = 0':['The equation whose solutions are the images of f.','The equation whose solutions are the extrema of f.'],
+'inequação f(x) > 0':['The inequality whose solutions are the values where f is negative; solved with the variation chart.','The inequality whose solutions are the values where f is increasing; solved with the sign chart or the graph.'],
+'função sem zeros':['A function whose graph does not touch the Oy axis.','A function whose graph passes through the origin.'],
+'zero duplo':['A zero where the graph crosses the Ox axis twice; the function changes sign twice.','A zero where the graph touches the Oy axis without crossing it; the function does not change sign.'],
+'mudança de sinal':['At a double zero, the function goes from positive to negative or vice versa.','At an extremum, the function goes from increasing to decreasing or vice versa.'],
+'monotonia':['Studying the intervals where the function is positive, negative or zero.','Studying the intervals where the function is even, odd or neither.'],
+'função crescente':['On an interval, if x₁ < x₂ then f(x₁) > f(x₂): the graph «goes up» from left to right.','On an interval, if x₁ < x₂ then f(x₁) < f(x₂): the graph «goes up» from right to left.'],
+'função decrescente':['On an interval, if x₁ < x₂ then f(x₁) < f(x₂): the graph «goes down» from left to right.','On an interval, if x₁ > x₂ then f(x₁) > f(x₂): the graph «goes down» from left to right.'],
+'função constante':['A function in which all objects have different images; its graph is a horizontal line.','A function in which all objects have the same image; its graph is a vertical line.'],
+'crescente em sentido lato':['If x₁ < x₂ then f(x₁) < f(x₂): it never has constant stretches.','If x₁ < x₂ then f(x₁) ≥ f(x₂): it may have constant stretches.'],
+'função monótona':['A function that, on an interval, changes direction at least once.','A function that, on an interval, is always constant.'],
+'intervalo de monotonia':['An interval where the function keeps the same sign.','A smallest interval where the function changes its direction of change.'],
+'quadro de variação':['A table that summarises the intervals where the function is positive (+) and negative (−) and its zeros.','A table that summarises the intervals of monotonicity (↗, ↘) and the zeros.'],
+'extremo':['A maximum or minimum value reached by the variable x in the domain.','A maximum value reached by the function, absolute only (on the whole domain).'],
+'máximo absoluto':['The largest image of the function near a point.','The largest object in the domain of the function.'],
+'mínimo absoluto':['The smallest image of the function near a point.','The smallest object in the domain of the function.'],
+'máximo relativo':['An image that is the largest on the whole domain, with no larger image anywhere.','An image that is the smallest near the point, although there may be smaller images elsewhere.'],
+'mínimo relativo':['An image that is the smallest on the whole domain.','An image that is the largest near the point.'],
+'maximizante':['The maximum image the function reaches.','The object where the function reaches a minimum.'],
+'minimizante':['The minimum image the function reaches.','The object where the function reaches a maximum.'],
+'extremos num intervalo fechado':['On an interval [a, b], the absolute extrema are always at the endpoints a and b.','On an interval [a, b], the absolute extrema are always inside, never at the endpoints.'],
+'vértice da parábola':['The point where the quadratic function meets the Ox axis; its sign changes there.','The point where the quadratic function reaches its extremum; its monotonicity stays the same there.'],
+'função par':['A function with a symmetric domain such that f(−x) = −f(x) for every x; its graph is symmetric about the Oy axis.','A function with a symmetric domain such that f(−x) = f(x) for every x; its graph is symmetric about the origin.'],
+'função ímpar':['A function with a symmetric domain such that f(−x) = f(x) for every x; its graph is symmetric about the origin.','A function with a symmetric domain such that f(−x) = −f(x) for every x; its graph is symmetric about the Oy axis.'],
+'nem par nem ímpar':['A function that satisfies both conditions at the same time.','A function whose domain does not contain zero.'],
+'domínio simétrico':['A domain such that, if x belongs to it, 1/x also belongs; a necessary condition for parity.','A domain such that, if x belongs to it, −x also belongs; a sufficient condition for the function to be even.'],
+'simetria em relação ao eixo Oy':['Each point (x, y) of the graph has its partner (x, −y): the graph is the same on both sides of the axis.','Each point (x, y) of the graph has its partner (−x, −y): the graph is the same on both sides of the axis.'],
+'simetria em relação à origem':['Each point (x, y) of the graph has its partner (−x, y): a half turn leaves the graph unchanged.','Each point (x, y) of the graph has its partner (y, x): a half turn leaves the graph unchanged.'],
+'paridade':['The property of a function being increasing, decreasing or constant.','The property of a function having an even or odd number of zeros.'],
+'composição de funções':['Applying one function to the result of another: (f ∘ g)(x) = g(f(x)).','Multiplying two functions: (f ∘ g)(x) = f(x) × g(x).'],
+'soma de funções':['(f + g)(x) = f(x) + g(x), at any point of either of the two domains.','(f + g)(x) = f(x + g(x)), on the common domain.'],
+'produto de funções':['(f × g)(x) = f(g(x)), on the common domain.','(f × g)(x) = f(x) × g(x), at any point of either of the two domains.'],
+'quociente de funções':['(f/g)(x) = f(x)/g(x), on the common domain, excluding the zeros of f.','(f/g)(x) = g(x)/f(x), on the common domain, excluding the zeros of g.'],
+'translação vertical':['The graph of f(x + k) is the graph of f moved k units up (k > 0) or down (k < 0).','The graph of f(x) + k is the graph of f moved k units down (k > 0) or up (k < 0).'],
+'translação horizontal':['The graph of f(x − h) is the graph of f moved h units to the left (h > 0) or to the right (h < 0).','The graph of f(x) − h is the graph of f moved h units to the right (h > 0) or to the left (h < 0).'],
+'reflexão no eixo Ox':['The graph of f(−x) is the mirror image of the graph of f in the Ox axis.','The graph of −f(x) is the mirror image of the graph of f in the Oy axis.'],
+'reflexão no eixo Oy':['The graph of −f(x) is the mirror image of the graph of f in the Oy axis.','The graph of f(−x) is the mirror image of the graph of f in the Ox axis.'],
+'dilatação vertical':['The graph of a·f(x), with a > 1, squashes the graph of f vertically; with 0 < a < 1, it stretches it.','The graph of f(a·x), with a > 1, stretches the graph of f vertically; with 0 < a < 1, it squashes it.'],
+'dilatação horizontal':['The graph of f(x/b), with b > 1, squashes the graph of f horizontally; with 0 < b < 1, it stretches it.','The graph of f(x)/b, with b > 1, stretches the graph of f horizontally; with 0 < b < 1, it squashes it.'],
+'família de funções':['A set of functions with different shapes that share the same parameter.','A set of functions with the same shape that differ in the independent variable.'],
+'parâmetro':['A variable whose value is chosen freely within the domain, like x.','A number which, when it changes in a formula, changes the domain but not the function.'],
+'função identidade':['The function that assigns to each x its opposite: id(x) = −x.','The function that always assigns the same number to each x: id(x) = 1.'],
+'transformação de gráficos':['Getting the formula of a new function from a known table, by translations, reflections and stretches.','Getting the graph of a new function from a known graph, by translations only.']
+};
+
+DIST_TR.es = {
+'função':['Correspondencia que a cada elemento de un conjunto A (conjunto de partida) le asocia al menos un elemento de un conjunto B (conjunto de llegada).','Correspondencia que a cada elemento de un conjunto B (conjunto de llegada) le asocia uno y solo un elemento de un conjunto A (conjunto de partida).'],
+'objeto':['Cada elemento del recorrido de una función, es decir, cada valor de y que produce la función.','Cada elemento del conjunto de llegada de una función, es decir, cada valor que puede tomar x.'],
+'imagem':['Elemento del conjunto de partida que la función asocia a una preimagen; se escribe f(x).','Elemento del conjunto de llegada que la función asocia a una preimagen; se escribe x.'],
+'domínio':['Conjunto de todas las imágenes de una función; se representa por D o D_f.','Conjunto de algunas preimágenes de una función, las que tienen imagen positiva; se representa por D o D_f.'],
+'contradomínio':['Conjunto de todas las imágenes de una función; contiene siempre al conjunto de llegada. Se representa por D′ o D′_f.','Conjunto de todas las preimágenes de una función; está contenido en el conjunto de llegada. Se representa por D′ o D′_f.'],
+'correspondência':['Regla que asocia elementos de un conjunto a elementos de otro; siempre es una función, aunque una preimagen tenga varias imágenes.','Regla que asocia elementos de un conjunto a elementos de otro; solo es función si cada imagen tiene una y solo una preimagen.'],
+'variável independente':['La variable cuyos valores dependen de la otra variable; normalmente y.','La variable cuyos valores se eligen libremente dentro del recorrido; normalmente y.'],
+'variável dependente':['La variable cuyo valor se elige libremente; normalmente x.','La variable cuyo valor depende de la independiente; normalmente x = f(y).'],
+'conjunto de partida':['Conjunto donde están las imágenes; en una función, coincide con el recorrido.','Conjunto donde están las preimágenes; en una función, contiene siempre al dominio sin coincidir con él.'],
+'conjunto de chegada':['Conjunto donde se buscan las imágenes; coincide siempre con el recorrido.','Conjunto donde se buscan las imágenes; está contenido en el recorrido, pero puede ser menor.'],
+'expressão analítica':['Fórmula que permite calcular la preimagen a partir de cada imagen.','Tabla que permite leer la imagen de cada preimagen.'],
+'função real de variável real':['Función cuyo dominio es un subconjunto de ℝ, siendo el conjunto de llegada un conjunto cualquiera.','Función cuyo dominio y conjunto de llegada son subconjuntos de ℕ.'],
+'f(x)':['Notación para la preimagen cuya imagen por la función f es x; se lee «f de x».','Notación para el producto de f por x; se lee «f por x».'],
+'igualdade de funções':['Dos funciones son iguales cuando tienen la misma expresión analítica, aunque tengan dominios distintos.','Dos funciones son iguales cuando tienen el mismo dominio y el mismo recorrido, aunque las imágenes sean distintas.'],
+'restrição de uma função':['Función que se obtiene tomando solo una parte del dominio y cambiando la expresión.','Función que se obtiene tomando solo una parte del conjunto de llegada, con la misma expresión.'],
+'domínio de existência':['El menor subconjunto de ℝ donde la expresión analítica tiene sentido.','El mayor subconjunto de ℝ donde la expresión analítica es positiva.'],
+'gráfico de uma função':['Conjunto de los puntos (f(x), x) del plano, con x en el dominio.','Conjunto de los puntos (x, f(x)) del plano, con x en el recorrido.'],
+'referencial cartesiano':['Dos ejes numéricos paralelos, Ox (abscisas) y Oy (ordenadas), que se cortan en el origen.','Dos ejes numéricos perpendiculares, Ox (ordenadas) y Oy (abscisas), que se cortan en el origen.'],
+'abcissa':['Segunda coordenada de un punto: se lee en el eje horizontal Ox.','Primera coordenada de un punto: se lee en el eje vertical Oy.'],
+'ordenada':['Primera coordenada de un punto: se lee en el eje vertical Oy.','Segunda coordenada de un punto: se lee en el eje horizontal Ox.'],
+'par ordenado':['Par (x, y) en el que el orden no importa; cada punto de la gráfica es el par (preimagen, imagen).','Par (x, y) en el que el orden importa; cada punto de la gráfica es el par (imagen, preimagen).'],
+'tabela de valores':['Representación de una función mediante una tabla con preimágenes y sus ceros.','Representación de una función mediante una tabla que muestra solo las imágenes positivas.'],
+'diagrama sagital':['Representación con dos conjuntos y flechas de cada imagen a su preimagen.','Representación con un solo conjunto y flechas entre sus elementos.'],
+'representação algébrica':['Representación de una función mediante su gráfica.','Representación de una función mediante su tabla de valores.'],
+'representação verbal':['Descripción de la función mediante una fórmula.','Descripción de la función mediante un diagrama de flechas.'],
+'teste da reta vertical':['Una curva es la gráfica de una función si ninguna recta horizontal la corta en más de un punto.','Una curva es la gráfica de una función si todas las rectas verticales la cortan en dos puntos.'],
+'ordenada na origem':['Abscisa del punto donde la gráfica corta el eje Ox; es el cero de f.','Ordenada del punto donde la gráfica corta el eje Oy; es f(1).'],
+'pontos de interseção com os eixos':['Con Ox: puntos (0, y) donde y es un cero de la función; con Oy: el punto (f(0), 0).','Con Ox: puntos (x, 0) donde x es un cero de la función; con Oy: el punto (0, f(1)).'],
+'escala':['Correspondencia entre las unidades de los ejes y la longitud en el papel o la pantalla; los dos ejes deben tener siempre la misma escala.','Número de puntos marcados en cada eje de un sistema de coordenadas.'],
+'leitura gráfica':['Obtener información (imágenes, preimágenes, ceros, extremos) resolviendo la expresión analítica.','Dibujar la gráfica a partir de una tabla de valores.'],
+'função injetiva':['Función en la que preimágenes iguales tienen siempre imágenes iguales: si x₁ = x₂, entonces f(x₁) = f(x₂).','Función en la que preimágenes distintas pueden tener la misma imagen: si x₁ ≠ x₂, entonces f(x₁) puede ser igual a f(x₂).'],
+'função sobrejetiva':['Función en la que todos los elementos del conjunto de partida tienen imagen: dominio = conjunto de partida.','Función en la que todos los elementos del conjunto de llegada son imagen de dos o más preimágenes.'],
+'função bijetiva':['Función inyectiva o sobreyectiva: basta con una de las dos propiedades.','Función inyectiva y sobreyectiva: a cada elemento del conjunto de llegada le corresponden al menos dos preimágenes.'],
+'função não injetiva':['Función en la que al menos una preimagen tiene dos imágenes distintas.','Función en la que todas las preimágenes tienen la misma imagen.'],
+'teste da reta horizontal':['Una función es inyectiva si ninguna recta vertical corta su gráfica en más de un punto.','Una función es inyectiva si alguna recta horizontal corta su gráfica en dos puntos.'],
+'função inversa':['Función f⁻¹ que deshace lo que hace f: si f(a) = b, entonces f⁻¹(a) = b. Existe siempre, para cualquier función.','Función f⁻¹ = 1/f, que deshace lo que hace f. Solo existe si f es biyectiva.'],
+'correspondência um a um':['Otra forma de decir inyección: cada preimagen tiene una imagen, pero puede haber imágenes sin preimagen y preimágenes con la misma imagen.','Otra forma de decir sobreyección: cada imagen viene de al menos una preimagen.'],
+'imagem de um conjunto':['Conjunto de las preimágenes cuyas imágenes pertenecen a un subconjunto del conjunto de llegada.','Conjunto de las imágenes de todos los elementos del dominio, sea cual sea el subconjunto elegido.'],
+'simetria em relação a y = x':['Las gráficas de f y de f⁻¹ son simétricas respecto del eje Oy.','Las gráficas de f y de f⁻¹ son simétricas respecto de la recta y = −x.'],
+'inversa de uma composição':['Para deshacer f después de g: (f ∘ g)⁻¹ = f⁻¹ ∘ g⁻¹.','Para deshacer f después de g: (f ∘ g)⁻¹ = g ∘ f.'],
+'zero de uma função':['Preimagen cuya imagen es 1: x tal que f(x) = 1. En la gráfica, abscisa de un punto donde la gráfica corta Ox.','Imagen de la preimagen 0: f(0). En la gráfica, ordenada del punto donde la gráfica corta Oy.'],
+'sinal de uma função':['Estudio de los intervalos donde f(x) es creciente, decreciente o constante.','Estudio de los intervalos donde x es positivo, negativo o nulo.'],
+'função positiva':['f es positiva en un intervalo si f(x) ≥ 0 para algún x de ese intervalo: la gráfica toca Ox.','f es positiva en un intervalo si x > 0 para todo x de ese intervalo: la gráfica está a la derecha de Oy.'],
+'função negativa':['f es negativa en un intervalo si f(x) < 0 para algún x de ese intervalo: parte de la gráfica está por debajo de Ox.','f es negativa en un intervalo si f(x) < 0 para todo x de ese intervalo: la gráfica está por encima de Ox.'],
+'quadro de sinal':['Tabla que resume, por intervalos, la monotonía de f y sus extremos.','Tabla que resume, por intervalos, el signo de x y sus ceros.'],
+'raiz':['Solución de una ecuación; los ceros de f son las raíces de la ecuación f(x) = 1.','Solución de una ecuación; los ceros de f son las raíces de la ecuación f(0) = x.'],
+'equação f(x) = 0':['Ecuación cuyas soluciones son las imágenes de f.','Ecuación cuyas soluciones son los extremos de f.'],
+'inequação f(x) > 0':['Inecuación cuyas soluciones son los valores donde f es negativa; se resuelve con la tabla de variación.','Inecuación cuyas soluciones son los valores donde f es creciente; se resuelve con la tabla de signos o la gráfica.'],
+'função sem zeros':['Función cuya gráfica no toca el eje Oy.','Función cuya gráfica pasa por el origen.'],
+'zero duplo':['Cero en el que la gráfica atraviesa el eje Ox dos veces; la función cambia de signo dos veces.','Cero en el que la gráfica toca el eje Oy sin atravesarlo; la función no cambia de signo.'],
+'mudança de sinal':['En un cero doble, la función pasa de positiva a negativa o al revés.','En un extremo, la función pasa de creciente a decreciente o al revés.'],
+'monotonia':['Estudio de los intervalos donde la función es positiva, negativa o nula.','Estudio de los intervalos donde la función es par, impar o ni par ni impar.'],
+'função crescente':['En un intervalo, si x₁ < x₂ entonces f(x₁) > f(x₂): la gráfica «sube» de izquierda a derecha.','En un intervalo, si x₁ < x₂ entonces f(x₁) < f(x₂): la gráfica «sube» de derecha a izquierda.'],
+'função decrescente':['En un intervalo, si x₁ < x₂ entonces f(x₁) < f(x₂): la gráfica «baja» de izquierda a derecha.','En un intervalo, si x₁ > x₂ entonces f(x₁) > f(x₂): la gráfica «baja» de izquierda a derecha.'],
+'função constante':['Función en la que todas las preimágenes tienen imágenes distintas; la gráfica es una recta horizontal.','Función en la que todas las preimágenes tienen la misma imagen; la gráfica es una recta vertical.'],
+'crescente em sentido lato':['Si x₁ < x₂ entonces f(x₁) < f(x₂): nunca tiene tramos constantes.','Si x₁ < x₂ entonces f(x₁) ≥ f(x₂): puede tener tramos constantes.'],
+'função monótona':['Función que, en un intervalo, cambia de sentido de variación al menos una vez.','Función que, en un intervalo, es siempre constante.'],
+'intervalo de monotonia':['Intervalo donde la función mantiene el mismo signo.','Intervalo mínimo donde la función cambia de sentido de variación.'],
+'quadro de variação':['Tabla que resume los intervalos donde la función es positiva (+) y negativa (−) y sus ceros.','Tabla que resume los intervalos de monotonía (↗, ↘) y los ceros.'],
+'extremo':['Valor máximo o mínimo que alcanza la variable x en el dominio.','Valor máximo que alcanza la función, solo absoluto (en todo el dominio).'],
+'máximo absoluto':['La mayor imagen de la función en un entorno de un punto.','La mayor preimagen del dominio de la función.'],
+'mínimo absoluto':['La menor imagen de la función en un entorno de un punto.','La menor preimagen del dominio de la función.'],
+'máximo relativo':['Imagen que es la mayor en todo el dominio, sin ninguna imagen mayor.','Imagen que es la menor en un entorno del punto, aunque pueda haber imágenes menores en otros puntos.'],
+'mínimo relativo':['Imagen que es la menor en todo el dominio.','Imagen que es la mayor en un entorno del punto.'],
+'maximizante':['La imagen máxima que alcanza la función.','Preimagen donde la función alcanza un mínimo.'],
+'minimizante':['La imagen mínima que alcanza la función.','Preimagen donde la función alcanza un máximo.'],
+'extremos num intervalo fechado':['En un intervalo [a, b], los extremos absolutos están siempre en los extremos a y b.','En un intervalo [a, b], los extremos absolutos están siempre en el interior, nunca en los extremos.'],
+'vértice da parábola':['Punto donde la función cuadrática corta el eje Ox; ahí cambia el signo.','Punto donde la función cuadrática alcanza su extremo; ahí se mantiene la monotonía.'],
+'função par':['Función de dominio simétrico en la que f(−x) = −f(x) para todo x; la gráfica es simétrica respecto del eje Oy.','Función de dominio simétrico en la que f(−x) = f(x) para todo x; la gráfica es simétrica respecto del origen.'],
+'função ímpar':['Función de dominio simétrico en la que f(−x) = f(x) para todo x; la gráfica es simétrica respecto del origen.','Función de dominio simétrico en la que f(−x) = −f(x) para todo x; la gráfica es simétrica respecto del eje Oy.'],
+'nem par nem ímpar':['Función que cumple las dos condiciones a la vez.','Función cuyo dominio no contiene el cero.'],
+'domínio simétrico':['Dominio en el que, si x pertenece, también pertenece 1/x; condición necesaria para la paridad.','Dominio en el que, si x pertenece, también pertenece −x; condición suficiente para que la función sea par.'],
+'simetria em relação ao eixo Oy':['Cada punto (x, y) de la gráfica tiene su pareja (x, −y): la gráfica es igual a ambos lados del eje.','Cada punto (x, y) de la gráfica tiene su pareja (−x, −y): la gráfica es igual a ambos lados del eje.'],
+'simetria em relação à origem':['Cada punto (x, y) de la gráfica tiene su pareja (−x, y): girar media vuelta deja la gráfica igual.','Cada punto (x, y) de la gráfica tiene su pareja (y, x): girar media vuelta deja la gráfica igual.'],
+'paridade':['Propiedad de una función de ser creciente, decreciente o constante.','Propiedad de una función de tener un número par o impar de ceros.'],
+'composição de funções':['Aplicar una función al resultado de otra: (f ∘ g)(x) = g(f(x)).','Multiplicar dos funciones: (f ∘ g)(x) = f(x) × g(x).'],
+'soma de funções':['(f + g)(x) = f(x) + g(x), en cualquier punto de uno de los dos dominios.','(f + g)(x) = f(x + g(x)), en el dominio común.'],
+'produto de funções':['(f × g)(x) = f(g(x)), en el dominio común.','(f × g)(x) = f(x) × g(x), en cualquier punto de uno de los dos dominios.'],
+'quociente de funções':['(f/g)(x) = f(x)/g(x), en el dominio común, excluyendo los ceros de f.','(f/g)(x) = g(x)/f(x), en el dominio común, excluyendo los ceros de g.'],
+'translação vertical':['La gráfica de f(x + k) se obtiene desplazando la de f k unidades hacia arriba (k > 0) o hacia abajo (k < 0).','La gráfica de f(x) + k se obtiene desplazando la de f k unidades hacia abajo (k > 0) o hacia arriba (k < 0).'],
+'translação horizontal':['La gráfica de f(x − h) se obtiene desplazando la de f h unidades a la izquierda (h > 0) o a la derecha (h < 0).','La gráfica de f(x) − h se obtiene desplazando la de f h unidades a la derecha (h > 0) o a la izquierda (h < 0).'],
+'reflexão no eixo Ox':['La gráfica de f(−x) es la simétrica de la de f respecto del eje Ox.','La gráfica de −f(x) es la simétrica de la de f respecto del eje Oy.'],
+'reflexão no eixo Oy':['La gráfica de −f(x) es la simétrica de la de f respecto del eje Oy.','La gráfica de f(−x) es la simétrica de la de f respecto del eje Ox.'],
+'dilatação vertical':['La gráfica de a·f(x), con a > 1, comprime la de f en vertical; con 0 < a < 1, la estira.','La gráfica de f(a·x), con a > 1, estira la de f en vertical; con 0 < a < 1, la comprime.'],
+'dilatação horizontal':['La gráfica de f(x/b), con b > 1, comprime la de f en horizontal; con 0 < b < 1, la estira.','La gráfica de f(x)/b, con b > 1, estira la de f en horizontal; con 0 < b < 1, la comprime.'],
+'família de funções':['Conjunto de funciones con formas distintas que tienen el mismo parámetro.','Conjunto de funciones con la misma forma que se diferencian en la variable independiente.'],
+'parâmetro':['Variable cuyo valor se elige libremente dentro del dominio, como x.','Número que, al variar en una expresión, cambia el dominio pero no la función.'],
+'função identidade':['Función que a cada x le asocia su opuesto: id(x) = −x.','Función que a cada x le asocia siempre el mismo número: id(x) = 1.'],
+'transformação de gráficos':['Obtener la expresión de una nueva función a partir de una tabla conocida, mediante traslaciones, reflexiones y dilataciones.','Obtener la gráfica de una nueva función a partir de una gráfica conocida, solo mediante traslaciones.']
+};
+
+DIST_TR.hi = {
+'função':['एक संगति जो समुच्चय A (प्रारंभिक समुच्चय) के प्रत्येक अवयव को समुच्चय B (लक्ष्य समुच्चय) के कम से कम एक अवयव से जोड़ती है।','एक संगति जो समुच्चय B (लक्ष्य समुच्चय) के प्रत्येक अवयव को समुच्चय A (प्रारंभिक समुच्चय) के एक और केवल एक अवयव से जोड़ती है।'],
+'objeto':['फलन के परिसर का प्रत्येक अवयव, अर्थात y का प्रत्येक मान जो फलन देता है।','फलन के लक्ष्य समुच्चय का प्रत्येक अवयव, अर्थात x का प्रत्येक संभव मान।'],
+'imagem':['प्रारंभिक समुच्चय का वह अवयव जिसे फलन किसी पूर्व-प्रतिबिंब से जोड़ता है; इसे f(x) लिखते हैं।','लक्ष्य समुच्चय का वह अवयव जिसे फलन किसी पूर्व-प्रतिबिंब से जोड़ता है; इसे x लिखते हैं।'],
+'domínio':['फलन के सभी प्रतिबिंबों का समुच्चय; इसे D या D_f से दर्शाते हैं।','फलन के कुछ पूर्व-प्रतिबिंबों का समुच्चय, जिनका प्रतिबिंब धनात्मक है; इसे D या D_f से दर्शाते हैं।'],
+'contradomínio':['फलन के सभी प्रतिबिंबों का समुच्चय; इसमें लक्ष्य समुच्चय सदा समाहित होता है। इसे D′ या D′_f से दर्शाते हैं।','फलन के सभी पूर्व-प्रतिबिंबों का समुच्चय; यह लक्ष्य समुच्चय में समाहित होता है। इसे D′ या D′_f से दर्शाते हैं।'],
+'correspondência':['नियम जो एक समुच्चय के अवयवों को दूसरे के अवयवों से जोड़ता है; यह सदा फलन होता है, भले ही किसी पूर्व-प्रतिबिंब के कई प्रतिबिंब हों।','नियम जो एक समुच्चय के अवयवों को दूसरे के अवयवों से जोड़ता है; यह फलन तभी है जब प्रत्येक प्रतिबिंब का एक और केवल एक पूर्व-प्रतिबिंब हो।'],
+'variável independente':['वह चर जिसके मान दूसरे चर पर निर्भर करते हैं; प्रायः y।','वह चर जिसके मान परिसर के भीतर स्वतंत्र रूप से चुने जाते हैं; प्रायः y।'],
+'variável dependente':['वह चर जिसका मान स्वतंत्र रूप से चुना जाता है; प्रायः x।','वह चर जिसका मान स्वतंत्र चर पर निर्भर करता है; प्रायः x = f(y)।'],
+'conjunto de partida':['वह समुच्चय जिसमें प्रतिबिंब होते हैं; फलन में यह परिसर ही है।','वह समुच्चय जिसमें पूर्व-प्रतिबिंब होते हैं; फलन में इसमें प्रांत सदा समाहित होता है पर यह उसके बराबर नहीं होता।'],
+'conjunto de chegada':['वह समुच्चय जिसमें प्रतिबिंब खोजे जाते हैं; यह सदा परिसर के बराबर होता है।','वह समुच्चय जिसमें प्रतिबिंब खोजे जाते हैं; यह परिसर में समाहित होता है, पर उससे छोटा हो सकता है।'],
+'expressão analítica':['वह सूत्र जिससे प्रत्येक प्रतिबिंब से उसका पूर्व-प्रतिबिंब निकाला जाता है।','वह सारणी जिससे प्रत्येक पूर्व-प्रतिबिंब का प्रतिबिंब पढ़ा जाता है।'],
+'função real de variável real':['ऐसा फलन जिसका प्रांत ℝ का उपसमुच्चय हो, और लक्ष्य समुच्चय कोई भी समुच्चय हो।','ऐसा फलन जिसका प्रांत और लक्ष्य समुच्चय ℕ के उपसमुच्चय हों।'],
+'f(x)':['उस पूर्व-प्रतिबिंब का संकेतन जिसका फलन f के अंतर्गत प्रतिबिंब x है; इसे «f ऑफ़ x» पढ़ते हैं।','f और x के गुणनफल का संकेतन; इसे «f गुणा x» पढ़ते हैं।'],
+'igualdade de funções':['दो फलन समान होते हैं जब उनका विश्लेषणात्मक व्यंजक एक हो, भले ही उनके प्रांत भिन्न हों।','दो फलन समान होते हैं जब उनका प्रांत और परिसर एक हो, भले ही प्रतिबिंब भिन्न हों।'],
+'restrição de uma função':['प्रांत के केवल एक भाग को लेकर और सूत्र बदलकर प्राप्त फलन।','वही सूत्र रखते हुए लक्ष्य समुच्चय के केवल एक भाग को लेकर प्राप्त फलन।'],
+'domínio de existência':['ℝ का सबसे छोटा उपसमुच्चय जहाँ विश्लेषणात्मक व्यंजक सार्थक हो।','ℝ का सबसे बड़ा उपसमुच्चय जहाँ विश्लेषणात्मक व्यंजक धनात्मक हो।'],
+'gráfico de uma função':['तल के बिंदुओं (f(x), x) का समुच्चय, जहाँ x प्रांत में है।','तल के बिंदुओं (x, f(x)) का समुच्चय, जहाँ x परिसर में है।'],
+'referencial cartesiano':['दो समांतर संख्या अक्ष, Ox (x-अक्ष) और Oy (y-अक्ष), जो मूलबिंदु पर काटते हैं।','दो लंबवत संख्या अक्ष, Ox (y-अक्ष) और Oy (x-अक्ष), जो मूलबिंदु पर काटते हैं।'],
+'abcissa':['किसी बिंदु का दूसरा निर्देशांक: क्षैतिज अक्ष Ox पर पढ़ा जाता है।','किसी बिंदु का पहला निर्देशांक: ऊर्ध्वाधर अक्ष Oy पर पढ़ा जाता है।'],
+'ordenada':['किसी बिंदु का पहला निर्देशांक: ऊर्ध्वाधर अक्ष Oy पर पढ़ा जाता है।','किसी बिंदु का दूसरा निर्देशांक: क्षैतिज अक्ष Ox पर पढ़ा जाता है।'],
+'par ordenado':['युग्म (x, y) जिसमें क्रम महत्वपूर्ण नहीं है; आलेख का प्रत्येक बिंदु (पूर्व-प्रतिबिंब, प्रतिबिंब) युग्म है।','युग्म (x, y) जिसमें क्रम महत्वपूर्ण है; आलेख का प्रत्येक बिंदु (प्रतिबिंब, पूर्व-प्रतिबिंब) युग्म है।'],
+'tabela de valores':['पूर्व-प्रतिबिंबों और उनके शून्यकों की सारणी द्वारा फलन का निरूपण।','केवल धनात्मक प्रतिबिंब दिखाने वाली सारणी द्वारा फलन का निरूपण।'],
+'diagrama sagital':['दो समुच्चयों और प्रत्येक प्रतिबिंब से उसके पूर्व-प्रतिबिंब तक तीरों वाला निरूपण।','एक ही समुच्चय और उसके अवयवों के बीच तीरों वाला निरूपण।'],
+'representação algébrica':['फलन को उसके आलेख द्वारा दर्शाना।','फलन को उसकी मान सारणी द्वारा दर्शाना।'],
+'representação verbal':['फलन का किसी सूत्र द्वारा वर्णन।','फलन का तीर आरेख द्वारा वर्णन।'],
+'teste da reta vertical':['कोई वक्र फलन का आलेख है यदि कोई भी क्षैतिज रेखा उसे एक से अधिक बिंदु पर न काटे।','कोई वक्र फलन का आलेख है यदि सभी ऊर्ध्वाधर रेखाएँ उसे दो बिंदुओं पर काटें।'],
+'ordenada na origem':['उस बिंदु का भुज जहाँ आलेख Ox अक्ष को काटता है; यह f का शून्यक है।','उस बिंदु की कोटि जहाँ आलेख Oy अक्ष को काटता है; यह f(1) है।'],
+'pontos de interseção com os eixos':['Ox के साथ: बिंदु (0, y) जहाँ y फलन का शून्यक है; Oy के साथ: बिंदु (f(0), 0)।','Ox के साथ: बिंदु (x, 0) जहाँ x फलन का शून्यक है; Oy के साथ: बिंदु (0, f(1))।'],
+'escala':['अक्षों की इकाइयों और कागज़ या स्क्रीन पर लंबाई के बीच संबंध; दोनों अक्षों का पैमाना सदा एक ही होना चाहिए।','निर्देशांक पद्धति के प्रत्येक अक्ष पर अंकित बिंदुओं की संख्या।'],
+'leitura gráfica':['विश्लेषणात्मक व्यंजक हल करके जानकारी (प्रतिबिंब, पूर्व-प्रतिबिंब, शून्यक, चरम मान) प्राप्त करना।','मान सारणी से आलेख बनाना।'],
+'função injetiva':['ऐसा फलन जिसमें समान पूर्व-प्रतिबिंबों के प्रतिबिंब सदा समान हों: यदि x₁ = x₂, तो f(x₁) = f(x₂)।','ऐसा फलन जिसमें भिन्न पूर्व-प्रतिबिंबों का प्रतिबिंब एक हो सकता है: यदि x₁ ≠ x₂, तो f(x₁), f(x₂) के बराबर हो सकता है।'],
+'função sobrejetiva':['ऐसा फलन जिसमें प्रारंभिक समुच्चय के हर अवयव का प्रतिबिंब हो: प्रांत = प्रारंभिक समुच्चय।','ऐसा फलन जिसमें लक्ष्य समुच्चय का हर अवयव दो या अधिक पूर्व-प्रतिबिंबों का प्रतिबिंब हो।'],
+'função bijetiva':['ऐसा फलन जो एकैकी या आच्छादक हो: दोनों में से एक गुण पर्याप्त है।','ऐसा फलन जो एकैकी और आच्छादक हो: लक्ष्य समुच्चय के प्रत्येक अवयव के कम से कम दो पूर्व-प्रतिबिंब होते हैं।'],
+'função não injetiva':['ऐसा फलन जिसमें कम से कम एक पूर्व-प्रतिबिंब के दो भिन्न प्रतिबिंब हों।','ऐसा फलन जिसमें सभी पूर्व-प्रतिबिंबों का प्रतिबिंब एक ही हो।'],
+'teste da reta horizontal':['फलन एकैकी है यदि कोई भी ऊर्ध्वाधर रेखा उसके आलेख को एक से अधिक बिंदु पर न काटे।','फलन एकैकी है यदि कोई क्षैतिज रेखा उसके आलेख को दो बिंदुओं पर काटे।'],
+'função inversa':['फलन f⁻¹ जो f के काम को उलट देता है: यदि f(a) = b, तो f⁻¹(a) = b। यह हर फलन के लिए सदा होता है।','फलन f⁻¹ = 1/f, जो f के काम को उलट देता है। यह तभी होता है जब f एकैकी आच्छादक हो।'],
+'correspondência um a um':['एकैकी फलन का दूसरा नाम: हर पूर्व-प्रतिबिंब का एक प्रतिबिंब होता है, पर कुछ प्रतिबिंबों का पूर्व-प्रतिबिंब न हो और कुछ पूर्व-प्रतिबिंबों का प्रतिबिंब एक हो सकता है।','आच्छादक फलन का दूसरा नाम: हर प्रतिबिंब कम से कम एक पूर्व-प्रतिबिंब से आता है।'],
+'imagem de um conjunto':['उन पूर्व-प्रतिबिंबों का समुच्चय जिनके प्रतिबिंब लक्ष्य समुच्चय के किसी उपसमुच्चय में हैं।','प्रांत के सभी अवयवों के प्रतिबिंबों का समुच्चय, चाहे कोई भी उपसमुच्चय चुना जाए।'],
+'simetria em relação a y = x':['f और f⁻¹ के आलेख Oy अक्ष के सापेक्ष सममित होते हैं।','f और f⁻¹ के आलेख रेखा y = −x के सापेक्ष सममित होते हैं।'],
+'inversa de uma composição':['g के बाद f को उलटने के लिए: (f ∘ g)⁻¹ = f⁻¹ ∘ g⁻¹।','g के बाद f को उलटने के लिए: (f ∘ g)⁻¹ = g ∘ f।'],
+'zero de uma função':['वह पूर्व-प्रतिबिंब जिसका प्रतिबिंब 1 है: x जिसके लिए f(x) = 1। आलेख पर, उस बिंदु का भुज जहाँ आलेख Ox को काटता है।','पूर्व-प्रतिबिंब 0 का प्रतिबिंब: f(0)। आलेख पर, उस बिंदु की कोटि जहाँ आलेख Oy को काटता है।'],
+'sinal de uma função':['उन अंतरालों का अध्ययन जहाँ f(x) वर्धमान, ह्रासमान या अचर है।','उन अंतरालों का अध्ययन जहाँ x धनात्मक, ऋणात्मक या शून्य है।'],
+'função positiva':['किसी अंतराल में f धनात्मक है यदि उस अंतराल के किसी x के लिए f(x) ≥ 0: आलेख Ox को छूता है।','किसी अंतराल में f धनात्मक है यदि उस अंतराल के प्रत्येक x के लिए x > 0: आलेख Oy के दाईं ओर है।'],
+'função negativa':['किसी अंतराल में f ऋणात्मक है यदि उस अंतराल के किसी x के लिए f(x) < 0: आलेख का कुछ भाग Ox के नीचे है।','किसी अंतराल में f ऋणात्मक है यदि उस अंतराल के प्रत्येक x के लिए f(x) < 0: आलेख Ox के ऊपर है।'],
+'quadro de sinal':['सारणी जो अंतरालों के अनुसार f की एकदिष्टता और उसके चरम मान दिखाती है।','सारणी जो अंतरालों के अनुसार x का चिह्न और उसके शून्यक दिखाती है।'],
+'raiz':['किसी समीकरण का हल; f के शून्यक समीकरण f(x) = 1 के मूल हैं।','किसी समीकरण का हल; f के शून्यक समीकरण f(0) = x के मूल हैं।'],
+'equação f(x) = 0':['वह समीकरण जिसके हल f के प्रतिबिंब हैं।','वह समीकरण जिसके हल f के चरम मान हैं।'],
+'inequação f(x) > 0':['वह असमिका जिसके हल वे मान हैं जहाँ f ऋणात्मक है; इसे परिवर्तन सारणी से हल करते हैं।','वह असमिका जिसके हल वे मान हैं जहाँ f वर्धमान है; इसे चिह्न सारणी या आलेख से हल करते हैं।'],
+'função sem zeros':['ऐसा फलन जिसका आलेख Oy अक्ष को नहीं छूता।','ऐसा फलन जिसका आलेख मूलबिंदु से होकर जाता है।'],
+'zero duplo':['ऐसा शून्यक जहाँ आलेख Ox अक्ष को दो बार पार करता है; फलन का चिह्न दो बार बदलता है।','ऐसा शून्यक जहाँ आलेख Oy अक्ष को छूता है पर पार नहीं करता; फलन का चिह्न नहीं बदलता।'],
+'mudança de sinal':['द्विगुण शून्यक पर फलन धनात्मक से ऋणात्मक या इसके विपरीत हो जाता है।','चरम मान पर फलन वर्धमान से ह्रासमान या इसके विपरीत हो जाता है।'],
+'monotonia':['उन अंतरालों का अध्ययन जहाँ फलन धनात्मक, ऋणात्मक या शून्य है।','उन अंतरालों का अध्ययन जहाँ फलन सम, विषम या दोनों में से कोई नहीं है।'],
+'função crescente':['किसी अंतराल में, यदि x₁ < x₂ तो f(x₁) > f(x₂): आलेख बाएँ से दाएँ «ऊपर चढ़ता» है।','किसी अंतराल में, यदि x₁ < x₂ तो f(x₁) < f(x₂): आलेख दाएँ से बाएँ «ऊपर चढ़ता» है।'],
+'função decrescente':['किसी अंतराल में, यदि x₁ < x₂ तो f(x₁) < f(x₂): आलेख बाएँ से दाएँ «नीचे उतरता» है।','किसी अंतराल में, यदि x₁ > x₂ तो f(x₁) > f(x₂): आलेख बाएँ से दाएँ «नीचे उतरता» है।'],
+'função constante':['ऐसा फलन जिसमें सभी पूर्व-प्रतिबिंबों के प्रतिबिंब भिन्न हों; आलेख एक क्षैतिज रेखा है।','ऐसा फलन जिसमें सभी पूर्व-प्रतिबिंबों का प्रतिबिंब एक ही हो; आलेख एक ऊर्ध्वाधर रेखा है।'],
+'crescente em sentido lato':['यदि x₁ < x₂ तो f(x₁) < f(x₂): इसमें कभी अचर भाग नहीं होते।','यदि x₁ < x₂ तो f(x₁) ≥ f(x₂): इसमें अचर भाग हो सकते हैं।'],
+'função monótona':['ऐसा फलन जो किसी अंतराल में कम से कम एक बार दिशा बदलता है।','ऐसा फलन जो किसी अंतराल में सदा अचर रहता है।'],
+'intervalo de monotonia':['वह अंतराल जहाँ फलन का चिह्न एक ही रहता है।','सबसे छोटा अंतराल जहाँ फलन परिवर्तन की दिशा बदलता है।'],
+'quadro de variação':['सारणी जो वे अंतराल दिखाती है जहाँ फलन धनात्मक (+) और ऋणात्मक (−) है, और शून्यक।','सारणी जो एकदिष्टता के अंतराल (↗, ↘) और शून्यक दिखाती है।'],
+'extremo':['प्रांत में चर x द्वारा प्राप्त उच्चिष्ठ या निम्निष्ठ मान।','फलन द्वारा प्राप्त केवल निरपेक्ष (पूरे प्रांत में) उच्चिष्ठ मान।'],
+'máximo absoluto':['किसी बिंदु के पास फलन का सबसे बड़ा प्रतिबिंब।','फलन के प्रांत का सबसे बड़ा पूर्व-प्रतिबिंब।'],
+'mínimo absoluto':['किसी बिंदु के पास फलन का सबसे छोटा प्रतिबिंब।','फलन के प्रांत का सबसे छोटा पूर्व-प्रतिबिंब।'],
+'máximo relativo':['वह प्रतिबिंब जो पूरे प्रांत में सबसे बड़ा हो, कहीं भी उससे बड़ा प्रतिबिंब न हो।','वह प्रतिबिंब जो बिंदु के पास सबसे छोटा हो, भले ही अन्य स्थानों पर छोटे प्रतिबिंब हों।'],
+'mínimo relativo':['वह प्रतिबिंब जो पूरे प्रांत में सबसे छोटा हो।','वह प्रतिबिंब जो बिंदु के पास सबसे बड़ा हो।'],
+'maximizante':['फलन द्वारा प्राप्त उच्चिष्ठ प्रतिबिंब।','वह पूर्व-प्रतिबिंब जहाँ फलन निम्निष्ठ प्राप्त करता है।'],
+'minimizante':['फलन द्वारा प्राप्त निम्निष्ठ प्रतिबिंब।','वह पूर्व-प्रतिबिंब जहाँ फलन उच्चिष्ठ प्राप्त करता है।'],
+'extremos num intervalo fechado':['अंतराल [a, b] में निरपेक्ष चरम मान सदा अंत्य बिंदुओं a और b पर होते हैं।','अंतराल [a, b] में निरपेक्ष चरम मान सदा भीतर होते हैं, अंत्य बिंदुओं पर कभी नहीं।'],
+'vértice da parábola':['वह बिंदु जहाँ द्विघात फलन Ox अक्ष को काटता है; वहाँ चिह्न बदलता है।','वह बिंदु जहाँ द्विघात फलन अपना चरम मान प्राप्त करता है; वहाँ एकदिष्टता वैसी ही रहती है।'],
+'função par':['सममित प्रांत वाला फलन जिसमें प्रत्येक x के लिए f(−x) = −f(x); आलेख Oy अक्ष के सापेक्ष सममित है।','सममित प्रांत वाला फलन जिसमें प्रत्येक x के लिए f(−x) = f(x); आलेख मूलबिंदु के सापेक्ष सममित है।'],
+'função ímpar':['सममित प्रांत वाला फलन जिसमें प्रत्येक x के लिए f(−x) = f(x); आलेख मूलबिंदु के सापेक्ष सममित है।','सममित प्रांत वाला फलन जिसमें प्रत्येक x के लिए f(−x) = −f(x); आलेख Oy अक्ष के सापेक्ष सममित है।'],
+'nem par nem ímpar':['ऐसा फलन जो दोनों शर्तें एक साथ पूरी करता है।','ऐसा फलन जिसके प्रांत में शून्य नहीं है।'],
+'domínio simétrico':['ऐसा प्रांत जिसमें यदि x है तो 1/x भी है; सम-विषम होने के लिए आवश्यक शर्त।','ऐसा प्रांत जिसमें यदि x है तो −x भी है; फलन के सम होने के लिए पर्याप्त शर्त।'],
+'simetria em relação ao eixo Oy':['आलेख के प्रत्येक बिंदु (x, y) का जोड़ा (x, −y) होता है: आलेख अक्ष के दोनों ओर एक जैसा है।','आलेख के प्रत्येक बिंदु (x, y) का जोड़ा (−x, −y) होता है: आलेख अक्ष के दोनों ओर एक जैसा है।'],
+'simetria em relação à origem':['आलेख के प्रत्येक बिंदु (x, y) का जोड़ा (−x, y) होता है: आधा घुमाने पर आलेख वैसा ही रहता है।','आलेख के प्रत्येक बिंदु (x, y) का जोड़ा (y, x) होता है: आधा घुमाने पर आलेख वैसा ही रहता है।'],
+'paridade':['फलन का वर्धमान, ह्रासमान या अचर होने का गुण।','फलन के शून्यकों की संख्या सम या विषम होने का गुण।'],
+'composição de funções':['एक फलन को दूसरे फलन के परिणाम पर लगाना: (f ∘ g)(x) = g(f(x))।','दो फलनों को गुणा करना: (f ∘ g)(x) = f(x) × g(x)।'],
+'soma de funções':['(f + g)(x) = f(x) + g(x), दोनों में से किसी भी प्रांत के किसी भी बिंदु पर।','(f + g)(x) = f(x + g(x)), उभयनिष्ठ प्रांत पर।'],
+'produto de funções':['(f × g)(x) = f(g(x)), उभयनिष्ठ प्रांत पर।','(f × g)(x) = f(x) × g(x), दोनों में से किसी भी प्रांत के किसी भी बिंदु पर।'],
+'quociente de funções':['(f/g)(x) = f(x)/g(x), उभयनिष्ठ प्रांत पर, f के शून्यकों को छोड़कर।','(f/g)(x) = g(x)/f(x), उभयनिष्ठ प्रांत पर, g के शून्यकों को छोड़कर।'],
+'translação vertical':['f(x + k) का आलेख, f के आलेख को k इकाई ऊपर (k > 0) या नीचे (k < 0) खिसकाने से मिलता है।','f(x) + k का आलेख, f के आलेख को k इकाई नीचे (k > 0) या ऊपर (k < 0) खिसकाने से मिलता है।'],
+'translação horizontal':['f(x − h) का आलेख, f के आलेख को h इकाई बाईं ओर (h > 0) या दाईं ओर (h < 0) खिसकाने से मिलता है।','f(x) − h का आलेख, f के आलेख को h इकाई दाईं ओर (h > 0) या बाईं ओर (h < 0) खिसकाने से मिलता है।'],
+'reflexão no eixo Ox':['f(−x) का आलेख, Ox अक्ष के सापेक्ष f के आलेख का दर्पण प्रतिबिंब है।','−f(x) का आलेख, Oy अक्ष के सापेक्ष f के आलेख का दर्पण प्रतिबिंब है।'],
+'reflexão no eixo Oy':['−f(x) का आलेख, Oy अक्ष के सापेक्ष f के आलेख का दर्पण प्रतिबिंब है।','f(−x) का आलेख, Ox अक्ष के सापेक्ष f के आलेख का दर्पण प्रतिबिंब है।'],
+'dilatação vertical':['a·f(x) का आलेख, a > 1 होने पर f के आलेख को ऊर्ध्वाधर सिकोड़ता है; 0 < a < 1 होने पर खींचता है।','f(a·x) का आलेख, a > 1 होने पर f के आलेख को ऊर्ध्वाधर खींचता है; 0 < a < 1 होने पर सिकोड़ता है।'],
+'dilatação horizontal':['f(x/b) का आलेख, b > 1 होने पर f के आलेख को क्षैतिज सिकोड़ता है; 0 < b < 1 होने पर खींचता है।','f(x)/b का आलेख, b > 1 होने पर f के आलेख को क्षैतिज खींचता है; 0 < b < 1 होने पर सिकोड़ता है।'],
+'família de funções':['भिन्न आकार वाले फलनों का समुच्चय, जिनका प्राचल एक ही है।','एक ही आकार वाले फलनों का समुच्चय, जो स्वतंत्र चर में भिन्न होते हैं।'],
+'parâmetro':['वह चर जिसका मान प्रांत के भीतर स्वतंत्र रूप से चुना जाता है, जैसे x।','वह संख्या जो व्यंजक में बदलने पर प्रांत बदलती है पर फलन नहीं।'],
+'função identidade':['वह फलन जो प्रत्येक x को उसके विपरीत से जोड़ता है: id(x) = −x।','वह फलन जो प्रत्येक x को सदा एक ही संख्या से जोड़ता है: id(x) = 1।'],
+'transformação de gráficos':['स्थानांतरण, परावर्तन और विस्तारण द्वारा किसी ज्ञात सारणी से नए फलन का व्यंजक प्राप्त करना।','केवल स्थानांतरण द्वारा किसी ज्ञात आलेख से नए फलन का आलेख प्राप्त करना।']
+};
+
 
 </script>
 <script>
@@ -1218,6 +1888,7 @@ const UIX = Object.assign({ pt:{
   fimTit:'Léxico concluído ✓', fimTexto:(N,t) => `Consultaste os ${N} termos do léxico em ${t}. Muito bem!`, recomecar:'↺ Recomeçar', fechar:'Fechar', parabens: N => `Parabéns! Consultaste os ${N} termos.`,
   min:['minuto','minutos'], seg:['segundo','segundos'], e:'e', lerEm:'Ler em', pt:'palavra em português', escolhaTit:'Escolhe a língua das explicações', voltarTemas:'Voltar aos temas.'
 }}, typeof UI_TXT !== 'undefined' ? UI_TXT : {});
+if(typeof PROVA_UI !== 'undefined') for(const lg in PROVA_UI) UIX[lg] = Object.assign(UIX[lg] || {}, PROVA_UI[lg]);
 const MULTI = typeof TRAD !== 'undefined' && Object.keys(TRAD).length > 0;
 let lingua = 'pt'; try{ if(MULTI) lingua = localStorage.getItem('lexico.lingua') || ''; }catch(e){}
 const escH = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
@@ -1836,7 +2507,7 @@ palco.addEventListener('pointerleave', () => { ptrPaira = null; });
 palco.addEventListener('pointermove', e => { if(!arrastar) return; ptr = local(e); moveu = Math.max(moveu, Math.hypot(ptr.x - inicio.x, ptr.y - inicio.y)); realce = maisProxima(ptr.x, ptr.y); });
 palco.addEventListener('pointerup', () => {
   if(!arrastar) return; arrastar = false; palco.classList.remove('agarrar');
-  if(realce >= 0){ const id = realce; if(fase === 'mod') escolherModulo(id); else if(fase === 'lex'){ if(MULTI) escolherTraducao(modAtual, id); else abrirPalavra(modAtual, id); } return; }
+  if(realce >= 0){ const id = realce; if(fase === 'mod') escolherModulo(id); else if(fase === 'lex'){ if(MULTI && !K.prova) escolherTraducao(modAtual, id); else abrirPalavra(modAtual, id); } return; }
   if(fase === 'lex' && moveu < 14 && toqueNoNucleo(ptr)){ tocarNucleo(); return; }
   zAlvo = clamp(Math.round(z), 1, NA);
 });
@@ -2025,6 +2696,7 @@ function aplicarLingua(){
   $('dl').innerHTML = [...nomes].sort((a,b) => a.localeCompare(b)).map(n => `<option value="${escH(n)}">`).join('');
   document.documentElement.lang = lingua === 'pt' || !lingua ? 'pt-PT' : LANGS[lingua].bcp;
   if(typeof atualizarContador === 'function') atualizarContador();
+  if(K.prova){ textosInicio(); if(K.inicio) portaoHora(); }
   if(fase !== 'dissolve'){ const zz = z; montar(); z = clamp(zz, 1, NA); }
 }
 function escolherLinguaInicial(){ $('linguas').classList.add('aberta'); }
@@ -2089,29 +2761,31 @@ if(K.progresso){ $('progresso').hidden = false; document.documentElement.classLi
 let opcoesAtuais = null;
 function baralhar(a){ for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function abrirPergunta(mi, ti){
-  const m = MODS[mi], t0 = m.t[ti], ch = chaveT(mi, ti), dis = (typeof DISTRATORES !== 'undefined' && DISTRATORES[t0[0]]) || [];
+  const m = MODS[mi], t0 = m.t[ti], ch = chaveT(mi, ti), lg = lingua || 'pt', L = termoEm(mi, ti, lg);
+  const dis = (lg !== 'pt' && typeof DIST_TR !== 'undefined' && DIST_TR[lg] && DIST_TR[lg][t0[0]]) || (typeof DISTRATORES !== 'undefined' && DISTRATORES[t0[0]]) || [];
   cartaoAberto = true; realce = fase === 'lex' && mi === modAtual ? ti : -1; pendente = null;
-  $('cChips').innerHTML = `<span class="chip" style="--c:${m.cor}">${m.id} · ${m.nome}</span>${anelDe(mi, ti)}`;
-  $('cTermo').textContent = t0[0];
-  $('cDef').classList.remove('destaque'); $('cDef').textContent = 'Escolhe a definição correta:'; $('cEx').textContent = '';
-  const ops = baralhar([{ txt:t0[3], ok:true }, ...dis.map(d => ({ txt:d, ok:false }))]);
+  $('cChips').innerHTML = `<span class="chip" style="--c:${m.cor}">${m.id} · ${temaEm(mi, lg)}</span>${anelDe(mi, ti)}`;
+  $('cTermo').innerHTML = escH(L[0]) + (lg !== 'pt' ? `<small class="ptOrig">${tr('pt')}: <b>${escH(t0[0])}</b></small>` : '');
+  $('cartao').lang = LANGS[lg].bcp;
+  $('cDef').classList.remove('destaque'); $('cDef').textContent = tr('pEscolhe'); $('cEx').textContent = '';
+  const ops = baralhar([{ txt:L[1], ok:true, d:-1 }, ...dis.map((x, k) => ({ txt:x, ok:false, d:k }))]);
   opcoesAtuais = { mi, ti, ch, ops };
   pararViz();
   $('cViz').innerHTML = '<div class="opcoes">' + ops.map((o, i) => `<button data-i="${i}"><b>${'ABC'[i]}</b><span>${escH(o.txt)}</span></button>`).join('') + '</div><div id="retorno"></div>';
   $('cRel').innerHTML = '';
-  $('cOuvir').hidden = true; $('cVoltar').textContent = '↩ Voltar sem responder';
+  $('cOuvir').hidden = true; $('cVoltar').textContent = tr('pVoltarSem');
   const r = respostas[ch]; if(r) marcar(r.i, false);
   $('cartao').classList.add('aberta'); $('cartao').scrollTop = 0;
-  say(t0[0] + '. Escolhe a definição correta.');
+  say(L[0] + '. ' + tr('pEscolhe'));
 }
 function marcar(i, nova){
   const { mi, ti, ch, ops } = opcoesAtuais, bs = [...$('cViz').querySelectorAll('.opcoes button')];
   bs.forEach((b, k) => { b.disabled = true; if(ops[k].ok) b.classList.add('certa'); if(k === i) b.classList.add('escolhida'); });
   const ok = ops[i] && ops[i].ok, ret = $('retorno');
   ret.className = ok ? 'ok' : 'nao';
-  ret.textContent = ok ? 'Certo! ✓' : 'Não é esta. A definição correta está assinalada a verde: repara no pormenor que as distingue.';
-  if(nova){ respostas[ch] = { ok, i, t:Math.round(tempo()/1000) }; pendente = { mi, ti }; guardar(); somResposta(ok); }
-  $('cVoltar').textContent = 'Continuar ▸';
+  ret.textContent = ok ? tr('pCerto') : tr('pErrado');
+  if(nova){ respostas[ch] = { ok, i, t:Math.round(tempo()/1000), l:lingua || 'pt', d:ops[i].d, s:Object.keys(respostas).filter(k => !k.startsWith('__')).length + 1 }; pendente = { mi, ti }; guardar(); somResposta(ok); }
+  $('cVoltar').textContent = tr('pContinuar');
 }
 $('cViz').addEventListener('click', e => { if(!K.prova || !opcoesAtuais) return; const b = e.target.closest('.opcoes button'); if(!b || b.disabled) return; marcar(+b.dataset.i, true); });
 function somResposta(ok){
@@ -2122,7 +2796,7 @@ function somResposta(ok){
   if(ok){ nota(1046.5, 0, 0.35, 0.07); nota(1318.5, 0.12, 0.45, 0.06); } else { nota(392, 0, 0.4, 0.045, 'triangle'); nota(349.2, 0.16, 0.5, 0.04, 'triangle'); }
 }
 function resultadoTexto(){
-  const certas = Object.entries(respostas).filter(([k, r]) => k !== '__enviado' && r.ok).length, pc = Math.round(100*certas/TOTAL);
+  const certas = Object.entries(respostas).filter(([k, r]) => !k.startsWith('__') && r.ok).length, pc = Math.round(100*certas/TOTAL);
   const erradas = []; MODS.forEach((m, mi) => m.t.forEach((t, ti) => { const r = respostas[chaveT(mi, ti)]; if(r && !r.ok) erradas.push(t[0]); }));
   const d = new Date();
   return { certas, pc, erradas, texto:
@@ -2130,49 +2804,116 @@ function resultadoTexto(){
 Aluno/a: ${nomeAluno || '(sem nome)'}
 Resultado: ${certas} de ${TOTAL} definições corretas (${pc} %)
 Tempo: ${mmss(tempo())}
+Língua da prova: ${LANGS[lingua || 'pt'].nome}
 Data: ${d.toLocaleDateString('pt-PT')} ${d.toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' })}
 A rever (${erradas.length}): ${erradas.length ? erradas.join('; ') : '—'}` };
 }
 function fimProva(){
   const R_ = resultadoTexto();
-  $('fim').querySelector('h2').textContent = 'Prova concluída ✓';
-  $('fimTexto').textContent = `${nomeAluno ? nomeAluno + ', a' : 'A'}certaste em ${R_.certas} de ${TOTAL} definições (${R_.pc} %), em ${porExtenso(tempo())}.` + (R_.erradas.length ? ' Vale a pena rever estas palavras no léxico:' : ' Excelente!');
-  const defOk = n => { for(const m of MODS) for(const t of m.t) if(t[0] === n) return t[3]; return ''; };
-  $('fimLista').innerHTML = R_.erradas.map(n => `<li><b>${escH(n)}</b><br><small>${escH(defOk(n))}</small></li>`).join('');
+  $('fim').querySelector('h2').textContent = tr('pFimTit');
+  $('fimTexto').textContent = tr('pFim', nomeAluno, R_.certas, TOTAL, R_.pc, porExtenso(tempo())) + (R_.erradas.length ? tr('pRever') : tr('pExcelente'));
+  const lg = lingua || 'pt', defOk = n => { for(let mi=0; mi<MODS.length; mi++) for(let ti=0; ti<MODS[mi].t.length; ti++) if(MODS[mi].t[ti][0] === n) return termoEm(mi, ti, lg); return [n, '']; };
+  $('fimLista').innerHTML = R_.erradas.map(n => { const L = defOk(n); return `<li><b>${escH(L[0])}</b>${lg !== 'pt' ? ` <small>(${escH(n)})</small>` : ''}<br><small>${escH(L[1])}</small></li>`; }).join('');
+  $('fimCopiar').textContent = tr('pClass'); $('fimFechar').textContent = tr('fechar');
   $('fimEnvio').hidden = false; $('fimRecomecar').hidden = true;
   $('fim').classList.add('aberta'); say('Prova concluída.');
-  enviarAuto();
 }
-/* envio automático do resultado para o recetor do professor (Apps Script), uma vez por prova */
-async function enviarAuto(){
-  if(!K.envio || respostas.__enviado) return;
-  const R_ = resultadoTexto(), agora = new Date().toISOString();
-  const d = { nome:nomeAluno, turma:'11.º PMA/PMM', codigo:'LEX-GF-' + Math.random().toString(36).slice(2, 8).toUpperCase(), prova:'Prova léxico – Generalidades sobre Funções',
-    valores:Math.round(R_.certas/TOTAL*200)/10, pontos:R_.certas, n1:'', n2:'', n3:'', metaInicial:'', metaFinal:'', autoavaliacao:'', emergencia:'não',
-    radiografia:`${R_.certas}/${TOTAL} definições corretas (${R_.pc} %) · tempo ${mmss(tempo())}`, perfil:R_.erradas.length ? 'A rever: ' + R_.erradas.join('; ') : 'Sem palavras a rever',
-    inicio:'', fim:agora, link:location.href.split('#')[0], relatorio:R_.texto };
-  try{ await fetch(K.envio, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body:JSON.stringify(d) }); respostas.__enviado = 1; guardar();
-    $('fimTexto').insertAdjacentHTML('beforeend', '<br><small>✓ Resultado enviado ao professor.</small>'); }
-  catch(e){ $('fimTexto').insertAdjacentHTML('beforeend', '<br><small>Não foi possível enviar automaticamente: usa os botões abaixo.</small>'); }
+/* =====================================================================
+   ENTREGA SÓ PELO CLASSROOM: um link-comprovativo com o guião do aluno
+   (ordem pela qual escolheu as palavras, resposta a cada uma, tempo, língua),
+   protegido por uma assinatura; o professor abre-o e vê o relatório.
+   ===================================================================== */
+const SAL = 'GF-P4-LEX-11PMA-2026', LGS = ['pt','en','es','hi'];
+const b64e = o => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const b64d = s => { s = s.replace(/-/g,'+').replace(/_/g,'/'); while(s.length % 4) s += '='; return JSON.parse(decodeURIComponent(escape(atob(s)))); };
+function hsh(s){ let h = 2166136261; for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }
+function comprovativo(){
+  const ord = Object.entries(respostas).filter(([k]) => !k.startsWith('__')).sort((a, b) => (a[1].s || 0) - (b[1].s || 0)).map(([k, r]) => {
+    const p = k.indexOf('|'), mi = MODS.findIndex(m => m.id === k.slice(0, p)), ti = mi < 0 ? -1 : MODS[mi].t.findIndex(x => x[0] === k.slice(p + 1));
+    return [mi, ti, r.ok ? 1 : 0, r.d ?? -2, r.t || 0, LGS.indexOf(r.l || 'pt')]; });
+  const d = { v:1, n:nomeAluno, l:LGS.indexOf(lingua || 'pt'), T:Math.round(tempo()/1000), f:Date.now(), o:ord };
+  d.h = hsh(SAL + JSON.stringify(d));
+  return location.href.split('#')[0] + '#r=' + b64e(d);
 }
-$('fimMail').onclick = () => { const R_ = resultadoTexto();
-  location.href = 'mailto:luis.costa@esmp.pt?subject=' + encodeURIComponent('Prova Generalidades sobre Funções – ' + (nomeAluno || 'aluno/a')) + '&body=' + encodeURIComponent(R_.texto); };
-$('fimCopiar').onclick = async () => { const R_ = resultadoTexto();
-  try{ await navigator.clipboard.writeText(R_.texto); }
-  catch(e){ const ta = document.createElement('textarea'); ta.value = R_.texto; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
-  $('fimCopiar').textContent = '✓ Resultado copiado';
-  $('fimTexto').insertAdjacentHTML('beforeend', '<br><small>No Classroom, abre o trabalho desta prova, cola o resultado num comentário privado e carrega em «Entregar».</small>');
-  window.open('https://classroom.google.com/share?url=' + encodeURIComponent(location.href.split('#')[0]), '_blank'); };
-if(K.prova){
+$('fimCopiar').onclick = async () => {
+  const u = comprovativo(), R_ = resultadoTexto();
+  try{ await navigator.clipboard.writeText(u); }catch(e){}
+  if(navigator.share){ try{ await navigator.share({ title:`Prova léxico – ${nomeAluno}`, text:`Prova «Generalidades sobre Funções» – ${nomeAluno} – ${R_.certas}/${TOTAL}`, url:u });
+      $('fimTexto').insertAdjacentHTML('beforeend', `<br><small>${tr('pClassInstr')}</small>`); return; }catch(e){} }
+  $('fimCopiar').textContent = tr('pCopiado');
+  $('fimTexto').insertAdjacentHTML('beforeend', `<br><small>${tr('pClassInstr')}</small>`);
+  window.open('https://classroom.google.com/share?url=' + encodeURIComponent(u), '_blank');
+};
+/* relatório do professor: abre-se quando o link tem #r=… */
+function mostrarRelatorio(){
+  let d, ok = false;
+  try{ d = b64d(location.hash.slice(3)); const h = d.h; delete d.h; ok = hsh(SAL + JSON.stringify(d)) === h; }catch(e){ d = null; }
+  $('app').hidden = true; document.querySelectorAll('.folha,#pop').forEach(e => e.style.display = 'none');
+  document.documentElement.classList.add('pagina');
+  const sec = document.createElement('section'); sec.id = 'relatorio';
+  if(!d){ sec.innerHTML = '<h2>Comprovativo inválido</h2><p>O link está incompleto ou foi alterado.</p>'; document.body.appendChild(sec); return; }
+  const o = d.o || [], certas = o.filter(x => x[2]).length, pc = Math.round(100*certas/TOTAL);
+  const dt = new Date(d.f), lgN = i => LANGS[LGS[i] || 'pt'].nome;
+  const porTema = MODS.map((m, mi) => { const xs = o.filter(x => x[0] === mi); return `<tr><td>${m.id} · ${escH(m.nome)}</td><td>${xs.filter(x => x[2]).length} / ${xs.length}</td><td>${m.t.length}</td></tr>`; }).join('');
+  const linhas = o.map((x, k) => { const m = MODS[x[0]], t0 = m && m.t[x[1]]; if(!t0) return '';
+    const errada = !x[2] && DISTRATORES[t0[0]] && x[3] >= 0 ? DISTRATORES[t0[0]][x[3]] : '';
+    return `<tr class="${x[2] ? 'ok' : 'nao'}"><td>${k + 1}</td><td>${mmss(x[4]*1000)}</td><td>${m.id}</td><td><b>${escH(t0[0])}</b></td><td>${x[2] ? '✓ correta' : '✗ ' + (errada ? `<small>escolheu: «${escH(errada)}»</small>` : 'errada')}</td><td>${LGS[x[5]] ? LGS[x[5]].toUpperCase() : ''}</td></tr>`; }).join('');
+  const intervalos = []; for(let k=1;k<o.length;k++) intervalos.push(o[k][4] - o[k-1][4]);
+  const media = o.length ? Math.round(d.T / o.length) : 0;
+  sec.innerHTML = `
+    <h2>Guião da prova · ${escH(d.n || '(sem nome)')}</h2>
+    <p class="${ok ? 'valido' : 'invalido'}">${ok ? '✓ Comprovativo válido (não foi alterado).' : '⚠ Atenção: a assinatura não confere — o link pode ter sido alterado.'}</p>
+    <div class="cartoes">
+      <div><b>${certas} / ${TOTAL}</b><span>definições corretas (${pc} %)</span></div>
+      <div><b>${(certas/TOTAL*20).toFixed(1).replace('.', ',')}</b><span>valores (escala 0–20)</span></div>
+      <div><b>${mmss(d.T*1000)}</b><span>tempo total · ${media} s por palavra</span></div>
+      <div><b>${o.length}</b><span>palavras respondidas</span></div>
+    </div>
+    <p>Língua escolhida: <b>${lgN(d.l)}</b> · Entregue em ${dt.toLocaleDateString('pt-PT')} às ${dt.toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' })}</p>
+    <h3>Por tema</h3>
+    <table><thead><tr><th>Tema</th><th>Certas / respondidas</th><th>Palavras</th></tr></thead><tbody>${porTema}</tbody></table>
+    <h3>Ordem lexical escolhida pelo aluno</h3>
+    <p class="nota">Cada linha é uma palavra, pela ordem em que o aluno a escolheu nos círculos; o tempo é contado desde «Começar».</p>
+    <table class="ordem"><thead><tr><th>#</th><th>Tempo</th><th>Tema</th><th>Palavra</th><th>Resposta</th><th>Língua</th></tr></thead><tbody>${linhas}</tbody></table>
+    <p class="acoesR"><button class="btn" onclick="print()">🖨 Imprimir / guardar em PDF</button></p>`;
+  document.body.appendChild(sec);
+  document.title = `Guião · ${d.n || ''} · Prova Generalidades sobre Funções`;
+}
+const RELATORIO = K.prova && location.hash.startsWith('#r=');
+if(K.prova && RELATORIO){ setTimeout(mostrarRelatorio, 50); }
+if(K.prova && !RELATORIO){
   $('linhaQ').hidden = true; $('bLingua').hidden = true;
-  UIX.pt.consultados = (n, N, f) => `Respondidas <b>${n}</b> de ${N} · faltam <b>${f}</b>`;
+  for(const lg in UIX) if(UIX[lg].pRespondidas) UIX[lg].consultados = UIX[lg].pRespondidas;
+  textosInicio();
+  $('iniLinguas').addEventListener('click', e => { const b = e.target.closest('button[data-lg]'); if(!b) return;
+    lingua = b.dataset.lg; try{ localStorage.setItem('lexico.lingua', lingua); }catch(err){} aplicarLingua(); });
   atualizarContador();
   if(concluido) setTimeout(fimProva, 600);
-  else if(!nomeAluno){ setTimeout(() => $('inicio').classList.add('aberta'), 900); }
+  else if(!nomeAluno){ setTimeout(() => $('inicio').classList.add('aberta'), 900); portaoHora(); }
   else { iniciarRelogio(); }
-  $('comecar').onclick = () => { const n = $('nomeAluno').value.trim(); if(!n){ $('nomeAluno').focus(); $('nomeAluno').placeholder = 'Escreve o teu nome, por favor'; return; }
+  $('comecar').onclick = () => { if(K.inicio && Date.now() < new Date(K.inicio).getTime()) return; const n = $('nomeAluno').value.trim(); if(!n){ $('nomeAluno').focus(); $('nomeAluno').placeholder = tr('pNomeFalta'); return; }
     nomeAluno = n; guardar(); $('inicio').classList.remove('aberta'); iniciarRelogio(); audio(); };
   $('nomeAluno').addEventListener('keydown', e => { if(e.key === 'Enter') $('comecar').click(); });
+}
+/* a prova só começa à hora marcada (ex.: 15h10): até lá, contagem decrescente */
+function textosInicio(){
+  if(!K.prova) return;
+  $('iniTit').textContent = tr('pTitulo'); $('iniLista').innerHTML = tr('pInstr').map(s => `<li>${s}</li>`).join('');
+  $('iniNome').textContent = tr('pNome'); $('nomeAluno').placeholder = tr('pNomePh');
+  if(!$('comecar').disabled) $('comecar').textContent = tr('pComecar');
+  document.querySelectorAll('#iniLinguas button').forEach(b => b.classList.toggle('on', b.dataset.lg === (lingua || 'pt')));
+  $('inicio').lang = LANGS[lingua || 'pt'].bcp;
+}
+function portaoHora(){
+  if(!K.inicio) return;
+  const alvo = new Date(K.inicio).getTime(), b = $('comecar');
+  clearTimeout(portaoHora.t);
+  const passo = () => { const f = alvo - Date.now();
+    if(f <= 0){ b.disabled = false; b.textContent = tr('pComecar'); return; }
+    const s = Math.ceil(f/1000), h = Math.floor(s/3600), m = Math.floor(s/60) % 60, r = s % 60;
+    b.disabled = true; b.textContent = tr('pPorta', new Date(alvo).toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' }), `${h ? h + ' h ' : ''}${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`);
+    portaoHora.t = setTimeout(passo, 1000); };
+  passo();
 }
 function fecharTudo(){ if(cartaoAberto) fecharCartao(); if(verbalAberto) fecharVerbal(); if('speechSynthesis' in window) speechSynthesis.cancel(); }
 $('cVoltar').onclick = () => { fecharCartao(); if('speechSynthesis' in window) speechSynthesis.cancel(); };
@@ -2185,7 +2926,7 @@ new ResizeObserver(() => { if(fase !== 'dissolve'){ const zz = z; montar(); z = 
 const pedido = new URLSearchParams(location.search).get('modulo');
 const iPedido = MODS.findIndex(m => m.id.toLowerCase() === (pedido || '').toLowerCase());
 if(iPedido >= 0) entrarLexico(iPedido);
-if(MULTI){ $('bLingua').hidden = false; if(!lingua) setTimeout(escolherLinguaInicial, 1200); else aplicarLingua(); }
+if(MULTI){ $('bLingua').hidden = false; if(!lingua && !K.prova) setTimeout(escolherLinguaInicial, 1200); else { if(!lingua) lingua = 'pt'; aplicarLingua(); } }
 requestAnimationFrame(ciclo);
 </script>
 </body>
